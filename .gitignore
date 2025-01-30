@@ -2,4 +2,4 @@
 **/bin/
 **/.env
 **/lib/
-
+.DS_Store
