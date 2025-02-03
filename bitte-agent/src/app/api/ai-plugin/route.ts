@@ -12,8 +12,8 @@ export async function GET() {
     const pluginData = {
         openapi: "3.0.0",
         info: {
-            title: "Boilerplate",
-            description: "API for the boilerplate",
+            title: "DivvyWealth",
+            description: "...",
             version: "1.0.0",
         },
         servers: [
