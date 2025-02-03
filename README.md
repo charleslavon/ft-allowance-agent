@@ -29,7 +29,63 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 
 1. After showing the above flows and the status of configured allowances, perhaps we cut to showing the nearblocks transctions of when an allowance goal is triggered and executed.  Perhaps it would also be helpful to show any internal logs that we have which show the growth conditional being satisifed and the call to trigger the agent/contract.
 
+## Demo Flow (3 minutes)
+1. **Introduction (30s)**
+   - Value prop, needs refinement: "Alice wants to easily invest in crypto and gain an income as the prices go up."
+   - Problem statement: Manual portfolio management is time-consuming, asocial, and risky
 
+2. **Core Interaction (60s)**
+   - Wallet connection demo(bitte?)
+   - Set allowance parameters
+     * "Secure profits when portfolio grows 20%"
+     * AI explains strategy and confirms understanding
 
+3. **Execution Showcase (60s)**
+   - Show portfolio
+   - Demo trade
+   - Highlight automated stablecoin conversion
+   - Show allowances
 
+4. **Wrap-up (30s)**
+   - Portfolio dashboard view
+   - Next steps and future features
 
+## Technical Implementation
+
+### 1. Smart Contract
+- Secure escrow functionality
+- Permission management system
+- Core functions:
+  * Deposit/withdraw
+  * Allowance creation
+  * Allowance removal
+  * Allowance expiration
+
+### 2. AI Integration
+- Natural language interaction for setup
+- Price monitoring and analysis
+- NEAR Intents swap
+
+### 3. Frontend/Bitte.ai Interface
+
+## Potential Blockers:
+- Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?
+- What role does the **LLM** play in the decision making and allowance setup?
+- Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.
+
+## Open Questions:
+- Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)
+- Where do the **working variables** get stored? (last payment date & amount)
+- If we are doing smart contract escrow, what's executing the trade?
+
+## Decisions to be made:
+* escrow or FAK?
+* bitte or NEAR.ai?
+* Where does the UX live?
+
+## Spike - Near Intents:
+- How do we get **user crypto balances**?
+- How do we get **current prices**?
+- How to execute **swaps**? slippage and fees?
+- What **assets** can we support?
+- How to manage access key with intents?
