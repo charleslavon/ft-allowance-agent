@@ -77,6 +77,7 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 - Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)
 - Where do the **working variables** get stored? (last payment date & amount)
 - If we are doing smart contract escrow, what's executing the trade?
+- Stretch goal - Staking integration/optimization, potentially with nuffle labs?
 
 ## Decisions to be made:
 * escrow or FAK?
