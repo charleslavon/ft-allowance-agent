@@ -52,41 +52,57 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 
 ## Technical Implementation
 
-### 1. Smart Contract
-- Secure escrow functionality
-- Permission management system
-- Core functions:
-  * Deposit/withdraw
-  * Allowance creation
-  * Allowance removal
-  * Allowance expiration
+### 1. Frontend/Bitte.ai Interface
 
-### 2. AI Integration
-- Natural language interaction for setup
-- Price monitoring and analysis
-- NEAR Intents swap
+### 2. Smart Contract(research required)
 
-### 3. Frontend/Bitte.ai Interface
+### 3. AI Integration
 
-## Potential Blockers:
-- Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?
-- What role does the **LLM** play in the decision making and allowance setup?
-- Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.
+### 4. Backend
+
+## Blockers:
+- **Q:** Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?  
+  **A:** **Bitte**  
+- **Q:** What role does the **LLM** play in the decision-making and allowance setup?  
+  **A:** Setup and interface initially  
+- **Q:** Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.  
+  **A:** Research spike on solutions  
 
 ## Open Questions:
-- Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)
-- Where do the **working variables** get stored? (last payment date & amount)
-- If we are doing smart contract escrow, what's executing the trade?
-- Stretch goal - Staking integration/optimization, potentially with nuffle labs?
+- **Q:** Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)  
+  **A:** Secure database (not smart contract) to preserve privacy and prevent frontrunning.  
+- **Q:** Where do the **working variables** (e.g., last payment date & amount) get stored?  
+  **A:** Research **Bitte** options for storage.  
+- **Q:** If we are doing smart contract escrow, what's executing the trade?  
+  **A:** Research spike
+- **Q:** Stretch goal - Staking integration/optimization, potentially with Nuffle Labs?  
+  **A:** Not to be prioritized for now.  
 
-## Decisions to be made:
-* escrow or FAK?
-* bitte or NEAR.ai?
-* Where does the UX live?
+## Key Decisions:
+- **Q:** Escrow or FAK?  
+  **A:** Research spike needed.  
+- **Q:** Bitte or NEAR.ai?  
+  **A:** **Bitte**.  
+- **Q:** Where does the UX live?  
+  **A:** Initially on **Bitte**.
 
-## Spike - Near Intents:
-- How do we get **user crypto balances**?
-- How do we get **current prices**?
-- How to execute **swaps**? slippage and fees?
-- What **assets** can we support?
-- How to manage access key with intents?
+## Research Spikes:
+### 1. **Escrow/LAK/FAK Options**  
+  - What are the tradeoffs here?  
+
+### 2. **Cron Job Feasibility**  
+  - Can we execute trades in the background with cron?  
+  - What would be executing the trades?  
+  - May need results from the Escrow/LAK/FAK spike to proceed.
+
+### 3. **NEAR Intents:**
+  - How do we retrieve **user crypto balances**?  
+  - How do we fetch **current prices**?  
+  - How to execute **swaps**, handling slippage and fees?  
+  - Which **assets** can we support?  
+  - How to manage the access key with intents?
+
+### 4. **Allowance storage:**
+  - How can we store allowance?
+      - Does Bitte have storage options?
+      - What about Neon?
