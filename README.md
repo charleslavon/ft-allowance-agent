@@ -24,7 +24,9 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 1. The agent fetches and displays a count of the NEAR, and omni-bridge tokens on a user's account, along with each token's current price, and the current combined USD value of all of these tokens (this can be considered the total minimum portfolio value, growth can be calculated as a difference from this amount.)
 1. The agent prompts the user to create an allowance goal. "What percentage growth rate are you looking to achieve before diversifying into stablecoins?" "Do you have a preference for USDT or USDC stablecoins?"
 1. The agent confirms the input params needed to setup an allowance goal
-1. The agent should be able to provide the user with an update on the status of their currently active allowance goals. e.g. a textual representation of the Activity section from the UI design -- insert image--
+1. The agent should be able to provide the user with an update on the status of their currently active allowance goals. e.g. a textual representation of the Activity section from the UI design
+   <img width="660" alt="Allowance Activity" src="https://github.com/user-attachments/assets/975c0071-7186-4932-8361-81a36dbf31f8" />
+
 1. After showing the above flows and the status of configured allowances, perhaps we cut to showing the nearblocks transctions of when an allowance goal is triggered and executed.  Perhaps it would also be helpful to show any internal logs that we have which show the growth conditional being satisifed and the call to trigger the agent/contract.
 
 
