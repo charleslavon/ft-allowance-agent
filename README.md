@@ -13,7 +13,7 @@ wip fungible token allowance agent for near.ai
 ### Minimal AI Agent Demo
 Divvy is a gain-optimizing Defi Agent that capitalizes on market volatility to grow your wealth, by determining which tokens to periodically swap into stablecoins to secure gains without reducing your portfolio below some minimum USD value. Realize these gains for yourself, or setup a conditional recurring allowance for your crypto curious friends & family.
 
-Our submissions aim to be strong candidates for these tracks - Proximity: $25K Prize Pool (via autonomous use of near-intents), $5K Prize Pool, and the General Track DeFi Agents ($20,000 for 5 best teams) As described [here](https://docs.google.com/document/d/1vRSABmFAgrpsEquisKOZcF6ZR9ydzdjY03sFbyleu18/edit?tab=t.0)
+Our submissions aim to be strong candidates for these tracks - Proximity: $25K Prize Pool (via autonomous use of near-intents), Bitte $5K Prize Pool for our use of chain abstraction, and the General Track DeFi Agents ($20,000 for 5 best teams) As described [here](https://docs.google.com/document/d/1vRSABmFAgrpsEquisKOZcF6ZR9ydzdjY03sFbyleu18/edit?tab=t.0),  and (this is post-minuimum demo) their Absurd Category- push the boundries with creative, outlandish AI experiments (e.g. send a fraction of your swap % to a friend via phone number or to a 5013c Experimental Arts Organization for a tax deductable donation for US Citizens)
 
 1. The Agent is deployed onto Bitte's Agent protocol, which is beneifical for this minimal scope due to it's heavy use of [nextjs scaffolding](https://www.bitte.ai/registry/agent-starter) and easy integration into Bitte Wallet's Agent UI. This chat based interaction in Bitte's UI can be used all the flows which require user interaction to setup an allowance goal.  Originally I thought that we would only leverage Bitte's Agent UI to setup the allowance goal, and when a goal's growth conditions are satisified, it would then trigger a near.ai agent to act on the user's behalf, but I think that's a dependency that can be removed if we can trigger a Bitte agent to run autonomously, similar to [Delta Trade](https://www.bitte.ai/registry/dcaagent.deltatrade.ai)
 1. Hard Requirements for Qualification. A video overview of the agent-building transactions is required. The agent must be hosted to enable testing by the judges. Additionally, the agent must be open source. The Bitte team is available to assist with hosting if needed @ https://t.me/bitteai.
@@ -30,23 +30,34 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 1. After showing the above flows and the status of configured allowances, perhaps we cut to showing the nearblocks transctions of when an allowance goal is triggered and executed.  Perhaps it would also be helpful to show any internal logs that we have which show the growth conditional being satisifed and the call to trigger the agent/contract.
 
 ## Demo Flow (3 minutes)
-1. **Introduction (30s)**
-   - Value prop, needs refinement: "Alice wants to easily invest in crypto and gain an income as the prices go up."
-   - Problem statement: Manual portfolio management is time-consuming, asocial, and risky
+1. **Introduction (1 minute, 15 seconds)**
+  ```We need to make it clear that we intend our submission for 4 prize tracks: Defi, Proximity Labs for our use of near-intents and cross-chain trading, Bitte for our use of chain abstraction,  and (this is post-minuimum demo) Absurd - push the boundries with creative, outlandish AI experiments (send a fraction of your swap % to a friend via phone number or to a 5013c Experimental Arts Organization for a tax deductable donation for US Citizens)
 
-2. **Core Interaction (60s)**
-   - Wallet connection demo(bitte?)
+  The protagonist:
+    An informercial style video opens in black and white with a dishelved person struggling to carry small plush pillows showing Bitcoin, Ethereum, and Near logos, they claim: "I couldn't buy the dip because I had no leverage, everything dipped, my portfolio tanked. How can I help my bags stay pumped??"
+
+  Narrator:
+    There's an AI for that - Simply tell Divvy Bot "whenever my portfolio pumps at least 18%, swap 6% into USDT". Divvy Bot will consider the current USD value of all the chain signature support tokens in your wallet as a minimum threshold, and when the market pumps your value to grow by at least 18%, Divvy Bot uses a limited access key to call a contract deployed onto your account that allows it to autonomously and securely act on your behalf to swap a randomized combination of just enough tokens into your preferred stablecoin to realize 6% growth.
+
+  The protagonist:
+    Now in a color video, perhaps with a beautiful background, the person confidently hold much larger plush pillows showing Bitcoin, Ethereum, and Near logos as they claim " I'll never be broke again. I'll always be able to buy the dip."
+
+  Narrator:
+   Never be this guy again - show can't buy the dip gif.  Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
+
+2. **Dig into the details of how everything works. (1 min, 30 seconds)**
+   - From within the Bitte wallet, go to the AI tab
+   - Click on Divvy
+   - Divvy shows your portfolio of chainsignature supported tokens
+   - Divvy prompts for the info needed to setup an allowance goal
    - Set allowance parameters
      * "Secure profits when portfolio grows 20%"
      * AI explains strategy and confirms understanding
-
-3. **Execution Showcase (60s)**
-   - Show portfolio
    - Demo trade
    - Highlight automated stablecoin conversion
    - Show allowances
 
-4. **Wrap-up (30s)**
+4. **Wrap-up (15s)**
    - Portfolio dashboard view
    - Next steps and future features
 
