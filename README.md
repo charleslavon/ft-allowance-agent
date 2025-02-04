@@ -31,7 +31,7 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 
 ## Demo Flow (3 minutes)
 1. **Introduction (1 minute, 15 seconds)**
-  ```We need to make it clear that we intend our submission for 4 prize tracks: Defi, Proximity Labs for our use of near-intents and cross-chain trading, Bitte for our use of chain abstraction,  and (this is post-minuimum demo) Absurd - push the boundries with creative, outlandish AI experiments (send a fraction of your swap % to a friend via phone number or to a 5013c Experimental Arts Organization for a tax deductable donation for US Citizens)
+We need to make it clear that we intend our submission for 4 prize tracks: Defi, Proximity Labs for our use of near-intents and cross-chain trading, Bitte for our use of chain abstraction,  and (this is post-minuimum demo) Absurd - push the boundries with creative, outlandish AI experiments (send a fraction of your swap % to a friend via phone number or to a 5013c Experimental Arts Organization for a tax deductable donation for US Citizens)
 
   The protagonist:
     An informercial style video opens in black and white with a dishelved person struggling to carry small plush pillows showing Bitcoin, Ethereum, and Near logos, they claim: "I couldn't buy the dip because I had no leverage, everything dipped, my portfolio tanked. How can I help my bags stay pumped??"
@@ -48,7 +48,7 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 https://github.com/user-attachments/assets/ffed4bef-42b2-4b55-a2e1-fe4e529eabd3
 
 
-  Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
+Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
 
 2. **Dig into the details of how everything works. (1 min)**
    - From within the Bitte wallet, go to the AI tab
