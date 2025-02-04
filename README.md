@@ -50,7 +50,7 @@ https://github.com/user-attachments/assets/ffed4bef-42b2-4b55-a2e1-fe4e529eabd3
 
   Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
 
-2. **Dig into the details of how everything works. (1 min, 30 seconds)**
+2. **Dig into the details of how everything works. (1 min)**
    - From within the Bitte wallet, go to the AI tab
    - Click on Divvy
    - Divvy shows your portfolio of chainsignature supported tokens
@@ -62,9 +62,13 @@ https://github.com/user-attachments/assets/ffed4bef-42b2-4b55-a2e1-fe4e529eabd3
    - Highlight automated stablecoin conversion
    - Show allowances
 
-4. **Wrap-up (15s)**
+3. Sustainability & Future Features (35 seconds)
+  - To sustain our committment to open source, the Divvy Bot applies a fee of 1% of the output token per swap.
+  - This revenue will fund future enhancements to what we hope will be part of our unique Intellectual Property, our asset optimization algorithm, which currently takes a randomized approach the ideal quantities of tokens to swap into stablecoins while maintaining a minimum diveristy of an accounts tokens. This can be extended to consider SOV from a token's crypto twitter community, a user's conformtable risk level, and marco economic factors.
+
+4. **Wrap-up (10s)**
    - Portfolio dashboard view
-   - Next steps and future features
+   - Disclaimer & Call to action on how to start using Divvy
 
 ## Technical Implementation
 
