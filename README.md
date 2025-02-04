@@ -29,7 +29,80 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 
 1. After showing the above flows and the status of configured allowances, perhaps we cut to showing the nearblocks transctions of when an allowance goal is triggered and executed.  Perhaps it would also be helpful to show any internal logs that we have which show the growth conditional being satisifed and the call to trigger the agent/contract.
 
+## Demo Flow (3 minutes)
+1. **Introduction (30s)**
+   - Value prop, needs refinement: "Alice wants to easily invest in crypto and gain an income as the prices go up."
+   - Problem statement: Manual portfolio management is time-consuming, asocial, and risky
 
+2. **Core Interaction (60s)**
+   - Wallet connection demo(bitte?)
+   - Set allowance parameters
+     * "Secure profits when portfolio grows 20%"
+     * AI explains strategy and confirms understanding
 
+3. **Execution Showcase (60s)**
+   - Show portfolio
+   - Demo trade
+   - Highlight automated stablecoin conversion
+   - Show allowances
 
+4. **Wrap-up (30s)**
+   - Portfolio dashboard view
+   - Next steps and future features
 
+## Technical Implementation
+
+### 1. Frontend/Bitte.ai Interface
+
+### 2. Smart Contract(research required)
+
+### 3. AI Integration
+
+### 4. Backend
+
+## Blockers:
+- **Q:** Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?  
+  **A:** **Bitte**  
+- **Q:** What role does the **LLM** play in the decision-making and allowance setup?  
+  **A:** Setup and interface initially  
+- **Q:** Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.  
+  **A:** Research spike on solutions  
+
+## Open Questions:
+- **Q:** Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)  
+  **A:** Secure database (not smart contract) to preserve privacy and prevent frontrunning.  
+- **Q:** Where do the **working variables** (e.g., last payment date & amount) get stored?  
+  **A:** Research **Bitte** options for storage.  
+- **Q:** If we are doing smart contract escrow, what's executing the trade?  
+  **A:** Research spike
+- **Q:** Stretch goal - Staking integration/optimization, potentially with Nuffle Labs?  
+  **A:** Not to be prioritized for now.  
+
+## Key Decisions:
+- **Q:** Escrow or FAK?  
+  **A:** Research spike needed.  
+- **Q:** Bitte or NEAR.ai?  
+  **A:** **Bitte**.  
+- **Q:** Where does the UX live?  
+  **A:** Initially on **Bitte**.
+
+## Research Spikes:
+### 1. **Escrow/LAK/FAK Options**  
+  - What are the tradeoffs here?  
+
+### 2. **Cron Job Feasibility**  
+  - Can we execute trades in the background with cron?  
+  - What would be executing the trades?  
+  - May need results from the Escrow/LAK/FAK spike to proceed.
+
+### 3. **NEAR Intents:**
+  - How do we retrieve **user crypto balances**?  
+  - How do we fetch **current prices**?  
+  - How to execute **swaps**, handling slippage and fees?  
+  - Which **assets** can we support?  
+  - How to manage the access key with intents?
+
+### 4. **Allowance storage:**
+  - How can we store allowance?
+      - Does Bitte have storage options?
+      - What about Neon?
