@@ -4,29 +4,32 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev\" \"make-agent dev\"",
-    "build": "next build && make-agent deploy -u https://agent-next-boilerplate.vercel.app",
+    "build": "next build",
+    "build:deploy": "next build && make-agent deploy -u https://agent-next-boilerplate.vercel.app",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@bitteprotocol/agent-sdk": "^0.0.11",
-    "near-safe": "^0.9.4",
-    "next": "14.2.15",
-    "react": "^18",
-    "react-dom": "^18",
-    "vercel-url": "^0.2.1",
-    "viem": "^2.21.54"
+    "@bitte-ai/agent-sdk": "0.1.7",
+    "near-api-js": "^5.0.1",
+    "near-safe": "0.9.10",
+    "next": "15.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "vercel-url": "0.2.6",
+    "viem": "2.22.19"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "concurrently": "^9.1.2",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.15",
-    "make-agent": "0.0.25",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "@types/node": "22.13.0",
+    "@types/react": "19.0.8",
+    "@types/react-dom": "19.0.3",
+    "concurrently": "9.1.2",
+    "make-agent": "^0.2.1",
+    "typescript": "5.7.3",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "15.1.6",
+    "@eslint/eslintrc": "^3.2.0"
   }
 }

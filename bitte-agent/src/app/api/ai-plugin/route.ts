@@ -1,12 +1,5 @@
+import { ACCOUNT_ID, PLUGIN_URL } from "@/app/config";
 import { NextResponse } from "next/server";
-
-
-const key = JSON.parse(process.env.BITTE_KEY || "{}");
-const config = JSON.parse(process.env.BITTE_CONFIG || "{}");
-
-if (!key?.accountId) {
-    console.error("no account");
-}
 
 export async function GET() {
     const pluginData = {
@@ -18,11 +11,11 @@ export async function GET() {
         },
         servers: [
             {
-                url: config.url,
+                url: PLUGIN_URL,
             },
         ],
         "x-mb": {
-            "account-id": key.accountId,
+            "account-id": ACCOUNT_ID,
             assistant: {
                 name: "Your Assistant",
                 description: "An assistant that answers with blockchain information, tells the user's account id, interacts with twitter, creates transaction payloads for NEAR and EVM blockchains, and flips coins.",
@@ -72,6 +65,10 @@ export async function GET() {
                                             accountId: {
                                                 type: "string",
                                                 description: "The user's account ID",
+                                            },
+                                            evmAddress: {
+                                                type: "string",
+                                                description: "The user's MPC EVM address",
                                             },
                                         },
                                     },

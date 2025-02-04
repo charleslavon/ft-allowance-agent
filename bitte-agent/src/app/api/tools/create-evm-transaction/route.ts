@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { MetaTransaction } from "near-safe";
-import { signRequestFor } from '@bitteprotocol/agent-sdk';
+import { signRequestFor } from '@bitte-ai/agent-sdk';
 import { parseEther } from 'viem';
 
 
