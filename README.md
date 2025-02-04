@@ -64,7 +64,7 @@ Set and forget it with automated growth based stablecoin swaps, and give yoursel
 
 3. Sustainability & Future Features (35 seconds)
   - To sustain our committment to open source, the Divvy Bot applies a fee of 1% of the output token per swap.
-  - This revenue will fund future enhancements to what we hope will be part of our unique Intellectual Property, our asset optimization algorithm, which currently takes a randomized approach to determine the ideal quantities of tokens to swap into stablecoins while maintaining a minimum diveristy ratio across an accounts tokens. This can be extended to consider SOV from a token's crypto twitter community, a user's comfortable risk level, and marco economic factors.
+  - This revenue will fund future enhancements: a standalone Divvy UI to support users with EVM, Coinbase, and Solana wallets, and what we hope will be part of our unique Intellectual Property, our asset optimization algorithm, which currently takes a randomized approach to determine the ideal quantities of tokens to swap into stablecoins while maintaining a specific ratio of holdings across token types. We will also explore extended this logic to consider SOV from a token's crypto twitter community, a user's comfortable risk level, and marco economic factors.
 
 4. **Wrap-up (10s)**
    - Portfolio dashboard view
