@@ -43,7 +43,12 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
     Now in a color video, perhaps with a beautiful background, the person confidently hold much larger plush pillows showing Bitcoin, Ethereum, and Near logos as they claim " I'll never be broke again. I'll always be able to buy the dip."
 
   Narrator:
-   Never be this guy again - show can't buy the dip gif.  Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
+   Never be this guy again 
+
+https://github.com/user-attachments/assets/ffed4bef-42b2-4b55-a2e1-fe4e529eabd3
+
+
+  Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
 
 2. **Dig into the details of how everything works. (1 min, 30 seconds)**
    - From within the Bitte wallet, go to the AI tab
