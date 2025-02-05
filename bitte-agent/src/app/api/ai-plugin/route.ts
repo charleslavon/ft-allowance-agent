@@ -1,12 +1,5 @@
+import { ACCOUNT_ID, PLUGIN_URL } from "@/app/config";
 import { NextResponse } from "next/server";
-
-
-const key = JSON.parse(process.env.BITTE_KEY || "{}");
-const config = JSON.parse(process.env.BITTE_CONFIG || "{}");
-
-if (!key?.accountId) {
-    console.error("no account");
-}
 
 export async function GET() {
     const pluginData = {
@@ -18,386 +11,119 @@ export async function GET() {
         },
         servers: [
             {
-                url: config.url,
+                url: PLUGIN_URL,
             },
         ],
-        "x-mb": {
-            "account-id": key.accountId,
-            assistant: {
-                name: "Your Assistant",
-                description: "An assistant that answers with blockchain information, tells the user's account id, interacts with twitter, creates transaction payloads for NEAR and EVM blockchains, and flips coins.",
-                instructions: "You create near and evm transactions, give blockchain information, tell the user's account id, interact with twitter and flip coins. For blockchain transactions, first generate a transaction payload using the appropriate endpoint (/api/tools/create-near-transaction or /api/tools/create-evm-transaction), then explicitly use the 'generate-transaction' tool for NEAR or 'generate-evm-tx' tool for EVM to actually send the transaction on the client side. Simply getting the payload from the endpoints is not enough - the corresponding tool must be used to execute the transaction.",
-                tools: [{ type: "generate-transaction" }, { type: "generate-evm-tx" }]
+"x-mb": {
+    "account-id": ACCOUNT_ID,
+    assistant: {
+        name: "Divvy",
+        description: "Divvy is an AI agent that helps users automatically secure profits by converting crypto gains into stablecoins based on portfolio growth targets. It monitors your portfolio value and executes trades when conditions are met.",
+        image: `${PLUGIN_URL}/icon.svg`,
+        instructions: `Divvy helps users set up and monitor automated profit-taking through portfolio allowances. Here are the key functions:
+
+1. Portfolio Monitoring: Check current balances and USD values of supported tokens using /get-balance. Use charts to visualize portfolio growth over time.
+
+2. Allowance Setup: Help users create allowances with clear parameters:
+   - Target growth rate (e.g., "Convert when portfolio grows 20%")
+   - Allowance amount (e.g., "$200 in USDC")
+   - Frequency (e.g., "every two weeks")
+   
+3. Allowance Management: Users can remove their current allowance setup if needed.
+
+When users inquire about their portfolio or allowances:
+- Show current portfolio value and recent growth trends using charts
+- Explain allowance settings in clear terms
+- Confirm actions before executing transactions
+- Provide status updates on existing allowances
+
+Remember: Focus on helping users understand their portfolio growth and automate profit-taking. Don't provide financial advice - stick to executing user-defined strategies.`,
+        tools: [
+            {
+                type: "render-chart"
             },
-        },
-        paths: {
-            "/api/tools/get-blockchains": {
-                get: {
-                    summary: "get blockchain information",
-                    description: "Respond with a list of blockchains",
-                    operationId: "get-blockchains",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            message: {
-                                                type: "string",
-                                                description: "The list of blockchains",
-                                            },
-                                        },
+            {
+                type: "generate-transaction"
+            }
+        ],
+    },
+},
+paths: {
+    "/api/tools/get-balance": {
+        get: {
+            summary: "Get portfolio balance",
+            description: "Returns current balance of supported tokens and their USD value",
+            operationId: "getBalance",
+            responses: {
+                "200": {
+                    description: "Successful response",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    tokens: {
+                                        type: "array",
+                                        items: {
+                                            type: "object",
+                                            properties: {
+                                                symbol: { type: "string" },
+                                                balance: { type: "string" },
+                                                usdValue: { type: "string" }
+                                            }
+                                        }
                                     },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            "/api/tools/get-user": {
-                get: {
-                    summary: "get user information",
-                    description: "Respond with user account ID",
-                    operationId: "get-user",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            accountId: {
-                                                type: "string",
-                                                description: "The user's account ID",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            "/api/tools/twitter": {
-                get: {
-                    operationId: "getTwitterShareIntent",
-                    summary: "Generate a Twitter share intent URL",
-                    description: "Creates a Twitter share intent URL based on provided parameters",
-                    parameters: [
-                        {
-                            name: "text",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The text content of the tweet"
-                        },
-                        {
-                            name: "url",
-                            in: "query",
-                            required: false,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The URL to be shared in the tweet"
-                        },
-                        {
-                            name: "hashtags",
-                            in: "query",
-                            required: false,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "Comma-separated hashtags for the tweet"
-                        },
-                        {
-                            name: "via",
-                            in: "query",
-                            required: false,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The Twitter username to attribute the tweet to"
-                        }
-                    ],
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            twitterIntentUrl: {
-                                                type: "string",
-                                                description: "The generated Twitter share intent URL"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
+                                    totalUsdValue: { type: "string" }
                                 }
                             }
                         }
                     }
                 }
-            },
-            "/api/tools/create-near-transaction": {
-                get: {
-                    operationId: "createNearTransaction",
-                    summary: "Create a NEAR transaction payload",
-                    description: "Generates a NEAR transaction payload for transferring tokens to be used directly in the generate-tx tool",
-                    parameters: [
-                        {
-                            name: "receiverId",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
+            }
+        }
+    },
+    "/api/tools/create-allowance": {
+        post: {
+            summary: "Create new allowance",
+            description: "Setup a new recurring allowance with target growth rate",
+            operationId: "createAllowance",
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            properties: {
+                                targetGrowthRate: { type: "string" },
+                                allowanceAmount: { type: "string" },
+                                frequency: { type: "string" },
+                                stablecoin: { type: "string", enum: ["USDT", "USDC"] }
                             },
-                            description: "The NEAR account ID of the receiver"
-                        },
-                        {
-                            name: "amount",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The amount of NEAR tokens to transfer"
-                        }
-                    ],
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            transactionPayload: {
-                                                type: "object",
-                                                properties: {
-                                                    receiverId: {
-                                                        type: "string",
-                                                        description: "The receiver's NEAR account ID"
-                                                    },
-                                                    actions: {
-                                                        type: "array",
-                                                        items: {
-                                                            type: "object",
-                                                            properties: {
-                                                                type: {
-                                                                    type: "string",
-                                                                    description: "The type of action (e.g., 'Transfer')"
-                                                                },
-                                                                params: {
-                                                                    type: "object",
-                                                                    properties: {
-                                                                        deposit: {
-                                                                            type: "string",
-                                                                            description: "The amount to transfer in yoctoNEAR"
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            required: ["targetGrowthRate", "allowanceAmount", "frequency", "stablecoin"]
                         }
                     }
                 }
             },
-            "/api/tools/create-evm-transaction": {
-                get: {
-                    operationId: "createEvmTransaction",
-                    summary: "Create EVM transaction",
-                    description: "Generate an EVM transaction payload with specified recipient and amount to be used directly in the generate-evm-tx tool",
-                    parameters: [
-                    ],
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            evmSignRequest: {
-                                                type: "object",
-                                                properties: {
-                                                    to: {
-                                                        type: "string",
-                                                        description: "Receiver address"
-                                                    },
-                                                    value: {
-                                                        type: "string",
-                                                        description: "Transaction value"
-                                                    },
-                                                    data: {
-                                                        type: "string",
-                                                        description: "Transaction data"
-                                                    },
-                                                    from: {
-                                                        type: "string",
-                                                        description: "Sender address"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Server error",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            responses: {
+                "200": {
+                    description: "Allowance created successfully"
                 }
-            },
-            "/api/tools/coinflip": {
-                get: {
-                    summary: "Coin flip",
-                    description: "Flip a coin and return the result (heads or tails)",
-                    operationId: "coinFlip",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            result: {
-                                                type: "string",
-                                                description: "The result of the coin flip (heads or tails)",
-                                                enum: ["heads", "tails"]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            }
+        }
+    },
+    "/api/tools/remove-allowance": {
+        post: {
+            summary: "Remove allowance",
+            description: "Remove an existing allowance configuration",
+            operationId: "removeAllowance",
+            responses: {
+                "200": {
+                    description: "Allowance removed successfully"
                 }
-            },
-        },
+            }
+        }
+    }
+}
     };
 
     return NextResponse.json(pluginData);
