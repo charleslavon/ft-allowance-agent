@@ -19,7 +19,7 @@ export async function GET() {
     assistant: {
         name: "Divvy",
         description: "Divvy is an AI agent that helps users automatically secure profits by converting crypto gains into stablecoins based on portfolio growth targets. It monitors your portfolio value and executes trades when conditions are met.",
-        image: `${pluginUrl}/icon.svg`,
+        image: `${PLUGIN_URL}/icon.svg`,
         instructions: `Divvy helps users set up and monitor automated profit-taking through portfolio allowances. Here are the key functions:
 
 1. Portfolio Monitoring: Check current balances and USD values of supported tokens using /get-balance. Use charts to visualize portfolio growth over time.
