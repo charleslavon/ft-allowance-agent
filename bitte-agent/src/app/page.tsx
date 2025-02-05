@@ -8,6 +8,8 @@ import { NetworkId } from '@/config';
 export default function Home() {
   // Track the current signed-in account ID.
   const [signedAccountId, setSignedAccountId] = useState('');
+  const [accessKeys, setAccessKeys] = useState([]);
+  const [selectedKey, setSelectedKey] = useState('');
 
   // Create and memoize the wallet instance.
   const wallet = useMemo(() => new Wallet({ networkId: NetworkId }), []);
@@ -16,6 +18,23 @@ export default function Home() {
   useEffect(() => {
     wallet.startUp(setSignedAccountId);
   }, [wallet]);
+
+  useEffect(() => {
+    async function fetchAccessKeys() {
+      if (signedAccountId) {
+        try {
+          const keys = await wallet.getAccessKeys(signedAccountId);
+          setAccessKeys(keys);
+          if (keys.length > 0) {
+            setSelectedKey(keys[0].public_key);
+          }
+        } catch (error) {
+          console.error('Failed to fetch access keys:', error);
+        }
+      }
+    }
+    fetchAccessKeys();
+  }, [signedAccountId, wallet]);
 
   // Determine the authentication action and label.
   const handleAuthAction = signedAccountId ? wallet.signOut : wallet.signIn;
@@ -67,7 +86,25 @@ export default function Home() {
       <div className="content">
         <h1>Test Flow</h1>
         {signedAccountId && (
-          <p className="user-info">Logged in as: {signedAccountId}</p>
+          <>
+            <p className="user-info">Logged in as: {signedAccountId}</p>
+            {accessKeys.length > 0 && (
+              <div className="access-keys">
+                <label htmlFor="accessKeySelect">Select Access Key:</label>
+                <select
+                  id="accessKeySelect"
+                  value={selectedKey}
+                  onChange={(e) => setSelectedKey(e.target.value)}
+                >
+                  {accessKeys.map((key, idx) => (
+                    <option key={idx} value={key.public_key}>
+                      {key.public_key} - {key.access_key.permission?.FunctionCall ? 'FunctionCall' : 'FullAccess'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </>
         )}
         <div className="button-group">
           <button className="test-btn blue" onClick={handleCreateFunctionKey}>
@@ -174,6 +211,26 @@ export default function Home() {
         }
         .test-btn.purple:hover {
           background-color: #7b1fa2;
+        }
+      `}</style>
+      <style jsx>{`
+        .access-keys {
+          margin-top: 1rem;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .access-keys label {
+          margin-bottom: 0.5rem;
+          font-weight: bold;
+        }
+
+        .access-keys select {
+          padding: 0.5rem;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+          background-color: #1e1e1e;
+          color: #e0e0e0;
         }
       `}</style>
     </NearContext.Provider>
