@@ -47,8 +47,7 @@ Note: `-t` flag enables testnet
 
 ### Building
 ```bash
-pnpm run build:dev  # Local build without deployment
-pnpm run build      # Production build with make-agent deploy
+pnpm run build  # Local build without deployment
 ```
 
 ### AI Agent Configuration
