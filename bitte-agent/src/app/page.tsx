@@ -10,6 +10,7 @@ export default function Home() {
   const [signedAccountId, setSignedAccountId] = useState('');
   const [accessKeys, setAccessKeys] = useState([]);
   const [selectedKey, setSelectedKey] = useState('');
+  const [conversionInfo, setConversionInfo] = useState(null);
 
   // Create and memoize the wallet instance.
   const wallet = useMemo(() => new Wallet({ networkId: NetworkId }), []);
@@ -67,7 +68,10 @@ export default function Home() {
 
   const handleSwapAndWithdraw = async () => {
     if (wallet.swapAndWithdraw) {
-      await wallet.swapAndWithdraw();
+      const result = await wallet.swapAndWithdraw();
+      if (result) {
+        setConversionInfo(result);
+      }
     } else {
       console.log('swapAndWithdraw not implemented');
     }
@@ -119,6 +123,12 @@ export default function Home() {
           <button className="test-btn purple" onClick={handleSwapAndWithdraw}>
             Swap and Withdraw
           </button>
+          {conversionInfo && (
+            <div className="conversion-info">
+              <p>Conversion Rate: 1 NEAR = {conversionInfo.conversionRate} USDC</p>
+              <p>Swapped Amount: {conversionInfo.usdcAmount} USDC</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -231,6 +241,14 @@ export default function Home() {
           border: 1px solid #ccc;
           background-color: #1e1e1e;
           color: #e0e0e0;
+        }
+      `}</style>
+      <style jsx>{`
+        .conversion-info {
+          margin-top: 1rem;
+          padding: 1rem;
+          background-color: #2e2e2e;
+          border-radius: 8px;
         }
       `}</style>
     </NearContext.Provider>

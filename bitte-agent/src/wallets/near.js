@@ -58,9 +58,12 @@ export class Wallet {
     const walletSelector = await this.selector;
     const isSignedIn = walletSelector.isSignedIn();
     const accountId = isSignedIn ? walletSelector.store.getState().accounts[0].accountId : '';
+    // Store the signed-in account ID for later use in other methods.
+    this.signedAccountId = accountId;
 
     walletSelector.store.observable.subscribe(async (state) => {
       const signedAccount = state?.accounts.find(account => account.active)?.accountId;
+      this.signedAccountId = signedAccount || '';
       accountChangeHook(signedAccount || '');
     });
 
@@ -200,12 +203,126 @@ export class Wallet {
     const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
     // Retrieve account state from the network
+    console.log("--", provider)
     const keys = await provider.query({
       request_type: 'view_access_key_list',
       account_id: accountId,
       finality: 'final',
     });
     return keys.keys;
+  };
+
+  /**
+   * Registers the user's wallet with the contract.
+   * NOTE: Adjust the contractId and parameters as required for your application.
+   */
+  register = async () => {
+    try {
+      const result = await this.callMethod({
+        contractId: "intents.near", // Placeholder contract for registration
+        method: "register",
+        args: { wallet_address: this.signedAccountId || "unknown" },
+        gas: THIRTY_TGAS,
+        deposit: "0"
+      });
+      console.log("Register result:", result);
+    } catch (error) {
+      console.error("Register failed:", error);
+    }
+  };
+
+  /**
+   * Deposits a fixed amount of 0.05 NEAR.
+   * This method performs a deposit by calling 'near_deposit' and 'ft_transfer_call'
+   * on the wrap.near contract.
+   */
+  deposit = async () => {
+    try {
+      const depositAmount = utils.format.parseNearAmount("0.05");
+      const nearDepositAction = {
+        type: 'FunctionCall',
+        params: {
+          methodName: 'near_deposit',
+          args: {},
+          gas: THIRTY_TGAS,
+          deposit: depositAmount,
+        }
+      };
+      const ftTransferCallAction = {
+        type: 'FunctionCall',
+        params: {
+          methodName: 'ft_transfer_call',
+          args: {
+            receiver_id: "intents.near", // Placeholder receiver contract for deposit-related logic
+            amount: depositAmount,
+            msg: ""
+          },
+          gas: THIRTY_TGAS,
+          deposit: "1", // Minimal deposit for ft_transfer_call; adjust as needed
+        }
+      };
+      const transactions = [{
+        receiverId: "wrap.near", // Using wrap.near as the contract that handles the deposit
+        actions: [nearDepositAction, ftTransferCallAction]
+      }];
+      const result = await this.signAndSendTransactions({ transactions });
+      console.log("Deposit transaction result:", result);
+    } catch (error) {
+      console.error("Deposit failed:", error);
+    }
+  };
+
+  /**
+   * Swaps 0.05 NEAR to USDC and withdraws the swapped tokens to the user's wallet address.
+   * This is a placeholder implementation:
+   * - Uses a dummy conversion rate (e.g., 1 NEAR = 10 USDC).
+   * - Calls a 'swap' method on a dummy swap contract and a 'withdraw' method on a dummy USDC contract.
+   * Adjust contract IDs, method names, and parameters as required.
+   */
+  swapAndWithdraw = async () => {
+    try {
+      const swapAmount = "0.05";
+      const yoctoAmount = utils.format.parseNearAmount(swapAmount);
+      
+      // Dummy conversion rate: 1 NEAR = 10 USDC (adjust as needed)
+      const conversionRate = 10;
+      const usdcAmount = (parseFloat(swapAmount) * conversionRate).toFixed(2);
+      
+      console.log(`Conversion rate: 1 NEAR = ${conversionRate} USDC. Swapping ${swapAmount} NEAR to ${usdcAmount} USDC.`);
+      
+      // Swap NEAR to USDC via a dummy swap contract call
+      const swapResult = await this.callMethod({
+        contractId: "swap.near", // Placeholder swap contract
+        method: "swap",
+        args: {
+          from_token: "NEAR",
+          to_token: "USDC",
+          amount: yoctoAmount,
+        },
+        gas: THIRTY_TGAS,
+        deposit: "0"
+      });
+      console.log("Swap result:", swapResult);
+      
+      // Withdraw swapped USDC to the user's wallet address using a dummy USDC contract call
+      const receiver = this.signedAccountId || "unknown";
+      const withdrawResult = await this.callMethod({
+        contractId: "usdc.near", // Placeholder USDC token contract
+        method: "withdraw",
+        args: {
+          receiver_id: receiver,
+          amount: usdcAmount, // In a real scenario, ensure correct token denomination conversion
+        },
+        gas: THIRTY_TGAS,
+        deposit: "0"
+      });
+      console.log("Withdraw result:", withdrawResult);
+      
+      // Return conversion information for display on the page
+      return { conversionRate, usdcAmount, swapResult, withdrawResult };
+    } catch (error) {
+      console.error("Swap and Withdraw failed:", error);
+    }
   };
 }
 
