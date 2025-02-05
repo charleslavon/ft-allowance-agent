@@ -70,54 +70,47 @@ export default function Home() {
           <p className="user-info">Logged in as: {signedAccountId}</p>
         )}
         <div className="button-group">
-          <button
-            className="test-btn blue"
-            onClick={handleCreateFunctionKey}
-          >
+          <button className="test-btn blue" onClick={handleCreateFunctionKey}>
             Create Function Key
           </button>
-          <button
-            className="test-btn blue"
-            onClick={handleRegister}
-          >
+          <button className="test-btn blue" onClick={handleRegister}>
             Register
           </button>
-          <button
-            className="test-btn green"
-            onClick={handleDeposit}
-          >
+          <button className="test-btn green" onClick={handleDeposit}>
             Deposit
           </button>
-          <button
-            className="test-btn purple"
-            onClick={handleSwapAndWithdraw}
-          >
+          <button className="test-btn purple" onClick={handleSwapAndWithdraw}>
             Swap and Withdraw
           </button>
         </div>
       </div>
 
       <style jsx>{`
+        /* Global Dark Theme */
+        * {
+          box-sizing: border-box;
+        }
+
         /* Header Styling */
         .header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 0 1.5rem;
-          background: #1b1b1b;
-          color: #00d1b2;
+          background: #121212;
+          color: #bb86fc;
           height: 60px;
-          box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .brand {
-          font-size: 1.4rem;
+          font-size: 1.5rem;
           font-weight: bold;
-          color: #00d1b2;
+          color: #bb86fc;
         }
         .btn {
-          background-color: #007f6e;
-          color: #fff;
+          background-color: #03dac6;
+          color: #121212;
           border: none;
           padding: 0.5rem 1rem;
           cursor: pointer;
@@ -127,55 +120,60 @@ export default function Home() {
           transition: background-color 0.3s;
         }
         .btn:hover {
-          background-color: #005f50;
+          background-color: #02c2ad;
         }
+
         /* Content Styling */
         .content {
           padding: 2rem;
-          background-color: #000;
+          background-color: #1e1e1e;
           color: #e0e0e0;
           min-height: calc(100vh - 60px); /* Adjust for header height */
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .user-info {
           margin-top: 1rem;
           font-size: 1rem;
-          color: #00d1b2;
+          color: #bb86fc;
         }
+
         /* Test Buttons Styling */
         .button-group {
           display: flex;
-          flex-direction: column;
+          flex-wrap: wrap;
           gap: 1rem;
           margin-top: 2rem;
         }
         .test-btn {
-          padding: 0.5rem 1rem;
+          padding: 0.6rem 1rem;
           border: none;
           border-radius: 8px;
           font-weight: bold;
           cursor: pointer;
           transition: background-color 0.3s;
+          /* Keep buttons compact and avoid full width stretch */
+          flex: 0 1 auto;
         }
         .test-btn.blue {
-          background-color: #007bff;
+          background-color: #0d47a1;
           color: #fff;
         }
         .test-btn.blue:hover {
-          background-color: #0056b3;
+          background-color: #1565c0;
         }
         .test-btn.green {
-          background-color: #28a745;
+          background-color: #2e7d32;
           color: #fff;
         }
         .test-btn.green:hover {
-          background-color: #1e7e34;
+          background-color: #388e3c;
         }
         .test-btn.purple {
-          background-color: #6f42c1;
+          background-color: #6a1b9a;
           color: #fff;
         }
         .test-btn.purple:hover {
-          background-color: #593093;
+          background-color: #7b1fa2;
         }
       `}</style>
     </NearContext.Provider>
