@@ -12,6 +12,11 @@ export default function Home() {
   const [selectedKey, setSelectedKey] = useState('');
   const [conversionInfo, setConversionInfo] = useState(null);
 
+  // New state variables to parameterize deposit, swap and withdraw amounts
+  const [depositAmount, setDepositAmount] = useState("0.01");
+  const [swapAmount, setSwapAmount] = useState("0.01");
+  const [withdrawAmount, setWithdrawAmount] = useState("0.01");
+
   // Create and memoize the wallet instance.
   const wallet = useMemo(() => new Wallet({ networkId: NetworkId }), []);
 
@@ -60,20 +65,31 @@ export default function Home() {
 
   const handleDeposit = async () => {
     if (wallet.deposit) {
-      await wallet.deposit();
+      await wallet.deposit(depositAmount);
     } else {
       console.log('deposit not implemented');
     }
   };
 
-  const handleSwapAndWithdraw = async () => {
-    if (wallet.swapAndWithdraw) {
-      const result = await wallet.swapAndWithdraw();
+  const handleSwap = async () => {
+    if (wallet.swap) {
+      const result = await wallet.swap(swapAmount);
       if (result) {
         setConversionInfo(result);
       }
     } else {
-      console.log('swapAndWithdraw not implemented');
+      console.log('swap not implemented');
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (wallet.withdraw) {
+      const result = await wallet.withdraw(withdrawAmount);
+      if (result) {
+        setConversionInfo(result);
+      }
+    } else {
+      console.log('withdraw not implemented');
     }
   };
 
@@ -117,12 +133,21 @@ export default function Home() {
           <button className="test-btn blue" onClick={handleRegister}>
             Register
           </button>
-          <button className="test-btn green" onClick={handleDeposit}>
-            Deposit
-          </button>
-          <button className="test-btn purple" onClick={handleSwapAndWithdraw}>
-            Swap and Withdraw
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="test-btn green" onClick={handleDeposit}>
+              Deposit
+            </button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="test-btn purple" onClick={handleSwap}>
+              Swap
+            </button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="test-btn purple" onClick={handleWithdraw}>
+              Withdraw
+            </button>
+          </div>
           {conversionInfo && (
             <div className="conversion-info">
               <p>Conversion Rate: 1 NEAR = {conversionInfo.conversionRate} USDC</p>

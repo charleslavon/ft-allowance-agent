@@ -232,13 +232,12 @@ export class Wallet {
   };
 
   /**
-   * Deposits a fixed amount of 0.05 NEAR.
-   * This method performs a deposit by calling 'near_deposit' and 'ft_transfer_call'
-   * on the wrap.near contract.
+   * Deposits a specified amount of NEAR.
+   * @param {string} amount - The amount of NEAR to deposit.
    */
-  deposit = async () => {
+  deposit = async (amount) => {
     try {
-      const depositAmount = utils.format.parseNearAmount("0.05");
+      const depositAmount = utils.format.parseNearAmount(amount);
       const nearDepositAction = {
         type: 'FunctionCall',
         params: {
@@ -253,16 +252,16 @@ export class Wallet {
         params: {
           methodName: 'ft_transfer_call',
           args: {
-            receiver_id: "intents.near", // Placeholder receiver contract for deposit-related logic
+            receiver_id: "intents.near",
             amount: depositAmount,
             msg: ""
           },
           gas: THIRTY_TGAS,
-          deposit: "1", // Minimal deposit for ft_transfer_call; adjust as needed
+          deposit: "1",
         }
       };
       const transactions = [{
-        receiverId: "wrap.near", // Using wrap.near as the contract that handles the deposit
+        receiverId: "wrap.near",
         actions: [nearDepositAction, ftTransferCallAction]
       }];
       const result = await this.signAndSendTransactions({ transactions });
@@ -273,26 +272,21 @@ export class Wallet {
   };
 
   /**
-   * Swaps 0.05 NEAR to USDC and withdraws the swapped tokens to the user's wallet address.
-   * This is a placeholder implementation:
-   * - Uses a dummy conversion rate (e.g., 1 NEAR = 10 USDC).
-   * - Calls a 'swap' method on a dummy swap contract and a 'withdraw' method on a dummy USDC contract.
-   * Adjust contract IDs, method names, and parameters as required.
+   * Swaps a specified amount of NEAR to USDC.
+   * @param {string} amount - Amount in NEAR to swap.
+   * @returns {Promise<Object>} - Swap result and published intent info.
    */
-  swapAndWithdraw = async () => {
+  swap = async (amount) => {
     try {
-      const swapAmount = "0.05";
-      const yoctoAmount = utils.format.parseNearAmount(swapAmount);
-      
+      const yoctoAmount = utils.format.parseNearAmount(amount);
       // Dummy conversion rate: 1 NEAR = 10 USDC (adjust as needed)
       const conversionRate = 10;
-      const usdcAmount = (parseFloat(swapAmount) * conversionRate).toFixed(2);
-      
-      console.log(`Conversion rate: 1 NEAR = ${conversionRate} USDC. Swapping ${swapAmount} NEAR to ${usdcAmount} USDC.`);
-      
-      // Swap NEAR to USDC via a dummy swap contract call
+      const usdcAmount = (parseFloat(amount) * conversionRate).toFixed(2);
+ 
+      console.log(`Conversion rate: 1 NEAR = ${conversionRate} USDC. Swapping ${amount} NEAR to ${usdcAmount} USDC.`);
+ 
       const swapResult = await this.callMethod({
-        contractId: "swap.near", // Placeholder swap contract
+        contractId: "swap.near",
         method: "swap",
         args: {
           from_token: "NEAR",
@@ -303,25 +297,100 @@ export class Wallet {
         deposit: "0"
       });
       console.log("Swap result:", swapResult);
-      
-      // Withdraw swapped USDC to the user's wallet address using a dummy USDC contract call
+ 
+      const intent = {
+        intent: "swap",
+        diff: {
+          NEAR: "-" + amount,
+          USDC: usdcAmount
+        }
+      };
+ 
+      const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: "dontcare",
+          jsonrpc: "2.0",
+          method: "publish_intent",
+          params: [intent]
+        })
+      });
+      const published = await rpcResponse.json();
+ 
+      return { conversionRate, usdcAmount, swapResult, intentPublished: published };
+    } catch (error) {
+      console.error("Swap failed:", error);
+    }
+  };
+
+  /**
+   * Withdraws a specified amount of USDC to the user's wallet.
+   * @param {string} amount - Amount in USDC to withdraw.
+   * @returns {Promise<Object>} - Withdraw result and published intent info.
+   */
+  withdraw = async (amount) => {
+    try {
       const receiver = this.signedAccountId || "unknown";
+
       const withdrawResult = await this.callMethod({
-        contractId: "usdc.near", // Placeholder USDC token contract
+        contractId: "usdc.near",
         method: "withdraw",
         args: {
           receiver_id: receiver,
-          amount: usdcAmount, // In a real scenario, ensure correct token denomination conversion
+          amount: amount,
         },
         gas: THIRTY_TGAS,
         deposit: "0"
       });
       console.log("Withdraw result:", withdrawResult);
-      
-      // Return conversion information for display on the page
-      return { conversionRate, usdcAmount, swapResult, withdrawResult };
+
+      const intent = {
+        intent: "withdraw",
+        diff: {
+          USDC: "-" + amount
+        }
+      };
+
+      const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: "dontcare",
+          jsonrpc: "2.0",
+          method: "publish_intent",
+          params: [intent]
+        })
+      });
+      const published = await rpcResponse.json();
+
+      return { withdrawResult, intentPublished: published };
     } catch (error) {
-      console.error("Swap and Withdraw failed:", error);
+      console.error("Withdraw failed:", error);
+    }
+  };
+
+  /**
+   * Checks the status of a swap intent given an intent id.
+   * @param {string} intentId - The intent identifier.
+   * @returns {Promise<Object>} - The status of the intent.
+   */
+  checkSwapStatus = async (intentId) => {
+    try {
+      const response = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: "dontcare",
+          jsonrpc: "2.0",
+          method: "check_swap_status",
+          params: [intentId]
+        })
+      });
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Check swap status failed:", error);
     }
   };
 }
