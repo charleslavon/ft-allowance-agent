@@ -97,7 +97,7 @@ export default function Home() {
     <NearContext.Provider value={{ wallet, signedAccountId }}>
       <header className="header">
         <div className="brand">
-          <Link href="/">DivvyWealth</Link>
+          <Link href="/">Divvy</Link>
         </div>
         <button className="btn" onClick={handleAuthAction}>
           {authLabel}

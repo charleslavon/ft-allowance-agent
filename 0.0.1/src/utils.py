@@ -179,10 +179,6 @@ async def deposit_near(deposit_amount: int = ONE_NEAR):
     return tr
 
 
-def swap_near_for_usdc(target_usd_amount: float):
-    print("TODO: Implement swap_near_for_usdc")
-
-
 class AcceptQuote(TypedDict):
     nonce: str
     recipient: str
@@ -298,6 +294,7 @@ async def main():
     amount_out_less_fee = str(
         int(best_quote.get("amount_out")) - int(referral_fee_amount))
 
+    # This is how you swap with a 1% fee to benevio-labs.near
     payload = Quote(signer_id=AccountId,
                     nonce=nonce_base64,
                     verifying_contract="intents.near",
