@@ -29,11 +29,12 @@ export class Wallet {
   constructor({ networkId = 'testnet', createAccessKeyFor = undefined }) {
     this.createAccessKeyFor = createAccessKeyFor;
     this.networkId = networkId;
-    // Expose intents for deposit, swap, and withdraw
+    // Expose intents for deposit, swap, withdraw, and public key check
     this.intents = {
       deposit: this.depositIntent.bind(this),
       swap: this.swapIntent.bind(this),
       withdraw: this.withdrawIntent.bind(this),
+      hasPublicKey: this.hasPublicKey.bind(this),
     };
   }
 
@@ -352,6 +353,26 @@ export class Wallet {
     } catch (error) {
       console.error("Withdraw intent failed:", error);
       return { error: error.toString() };
+    }
+  };
+
+  /**
+   * Checks if the current account's public key is registered on NEAR.
+   * @param {string} key - The public key to check.
+   * @returns {Promise<boolean>} - True if the public key is registered, false otherwise.
+   */
+  hasPublicKey = async (key) => {
+    if (!this.signedAccountId) return false;
+    try {
+      const result = await this.viewMethod({
+        contractId: "intents.near",
+        method: "has_public_key",
+        args: { account_id: this.signedAccountId, public_key: key },
+      });
+      return result;
+    } catch (error) {
+      console.error("Error checking public key registration:", error);
+      return false;
     }
   };
 }

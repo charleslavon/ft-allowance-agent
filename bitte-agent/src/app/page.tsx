@@ -11,6 +11,7 @@ export default function Home() {
   const [signedAccountId, setSignedAccountId] = useState('');
   const [accessKeys, setAccessKeys] = useState([]);
   const [selectedKey, setSelectedKey] = useState('');
+  const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
   // Remove conversionInfo in favor of explicit quote data and a rolling log
   const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: "LOADING" });
 
@@ -108,6 +109,21 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    async function checkRegistration() {
+      if (signedAccountId && selectedKey) {
+        try {
+          const registered = await wallet.intents.hasPublicKey(selectedKey);
+          setIsRegistered(registered);
+        } catch (error) {
+          console.error("Failed to check registration:", error);
+          setIsRegistered(false);
+        }
+      }
+    }
+    checkRegistration();
+  }, [signedAccountId, selectedKey, wallet]);
+
   return (
     <NearContext.Provider value={{ wallet, signedAccountId }}>
       <header className="header">
@@ -141,9 +157,11 @@ export default function Home() {
           </>
         )}
         <div className="button-group">
-          <button className="test-btn blue" onClick={handleRegister}>
-            Register
-          </button>
+          {!isRegistered && (
+            <button className="test-btn blue" onClick={handleRegister}>
+              Register
+            </button>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <button className="test-btn green" onClick={handleDeposit}>
               Deposit
