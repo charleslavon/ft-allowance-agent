@@ -10,15 +10,15 @@ export default function Home() {
   // Track the current signed-in account ID.
   const [signedAccountId, setSignedAccountId] = useState('');
   const [accessKeys, setAccessKeys] = useState([]);
-  const [selectedKey, setSelectedKey] = useState('');
+  const [selectedKey, setSelectedKey] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
   // Remove conversionInfo in favor of explicit quote data and a rolling log
   const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: "LOADING" });
 
   // New state variables to parameterize deposit, swap and withdraw amounts
-  const [depositAmount, setDepositAmount] = useState("1000000000000000000");
-  const [swapAmount, setSwapAmount] = useState("1000000000000000000");
-  const [withdrawAmount, setWithdrawAmount] = useState("1000000000000000000");
+  const [depositAmount, setDepositAmount] = useState("0.01");
+  const [swapAmount, setSwapAmount] = useState("0.01");
+  const [withdrawAmount, setWithdrawAmount] = useState("0.01");
   const [logs, setLogs] = useState([]);
 
   // Create and memoize the wallet instance.
@@ -36,7 +36,7 @@ export default function Home() {
           const keys = await wallet.getAccessKeys(signedAccountId);
           setAccessKeys(keys);
           if (keys.length > 0) {
-            setSelectedKey(keys[0].public_key);
+            setSelectedKey(keys[0]);
           }
         } catch (error) {
           console.error('Failed to fetch access keys:', error);
@@ -76,7 +76,7 @@ export default function Home() {
 
   const handleRegister = async () => {
     if (wallet.register) {
-      await wallet.register(selectedKey);
+      await wallet.register(selectedKey.public_key);
     } else {
       console.log('register not implemented');
     }
@@ -93,7 +93,7 @@ export default function Home() {
 
   const handleSwap = async () => {
     if (wallet.intents.swap) {
-      const result = await wallet.intents.swap(swapAmount, quoteData);
+      const result = await wallet.intents.swap(swapAmount, quoteData, selectedKey.access_key.nonce);
       setLogs(prev => [...prev, "Swap result: " + JSON.stringify(result)]);
     } else {
       console.log('swap intent not implemented');
@@ -113,7 +113,7 @@ export default function Home() {
     async function checkRegistration() {
       if (signedAccountId && selectedKey) {
         try {
-          const registered = await wallet.intents.hasPublicKey(selectedKey);
+          const registered = await wallet.intents.hasPublicKey(selectedKey.public_key);
           setIsRegistered(registered);
         } catch (error) {
           console.error("Failed to check registration:", error);
@@ -143,8 +143,11 @@ export default function Home() {
                 <label htmlFor="accessKeySelect">Select Access Key:</label>
                 <select
                   id="accessKeySelect"
-                  value={selectedKey}
-                  onChange={(e) => setSelectedKey(e.target.value)}
+                  value={selectedKey ? selectedKey.public_key : ""}
+                  onChange={(e) => {
+                    const key = accessKeys.find(key => key.public_key === e.target.value);
+                    setSelectedKey(key);
+                  }}
                 >
                   {accessKeys.map((key, idx) => (
                     <option key={idx} value={key.public_key}>

@@ -267,36 +267,71 @@ export class Wallet {
   };
 
   // New swap intent method using intents swap and fee transfer
-  swapIntent = async (amount, quoteData) => {
+  swapIntent = async (amount, quoteData, nonce, deadlineDeltaMs = 60000) => {
     try {
-      const { conversionRate, usdcAmount } = quoteData;
-      console.log(`Using quote: 1 NEAR = ${conversionRate} USDC. Swapping ${amount} NEAR to ${usdcAmount} USDC.`);
-      const swapIntentPayload = {
-         intent: "swap",
-         diff: {
-           NEAR: "-" + amount,
-           USDC: usdcAmount
-         }
+      if (!this.signedAccountId) {
+        throw new Error("Wallet is not signed in");
+      }
+
+      // Set a deadline (e.g. 60 seconds from now)
+      const deadline = new Date(Date.now() + deadlineDeltaMs).toISOString();
+
+      // Convert the NEAR amount (e.g. "0.103826755259393477016974") to yoctoNEAR.
+      const nearAmountYocto = utils.format.parseNearAmount(amount);
+      if (!nearAmountYocto) {
+        throw new Error("Invalid NEAR amount provided.");
+      }
+
+      // Build the diff object.
+      // Here we assume that:
+      // - "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near" represents USDC,
+      // - "nep141:wrap.near" represents wrapped NEAR.
+      const diff = {
+        "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near": "-" + quoteData.usdcAmount,
+        "nep141:wrap.near": nearAmountYocto
       };
-      // Calculate fee as 1% of usdcAmount
-      const feeAmount = (parseFloat(usdcAmount) * 0.01).toFixed(2);
-      const feeTransferIntent = {
-         intent: "transfer",
-         token: "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
-         receiver_id: "benevio-labs.near",
-         amount: feeAmount
+
+      // Construct the full payload matching the expected structure.
+      const payload = {
+        deadline,
+        intents: [
+          {
+            intent: "token_diff",
+            diff,
+            referral: "near-intents.intents-referral.near"
+          }
+        ],
+        signer_id: this.signedAccountId,
       };
-      const intents = [swapIntentPayload, feeTransferIntent];
+      const chargeFee = false; //TODO
+      if (chargeFee) {
+        payload.intents.push({
+          intent: "transfer",
+          receiver_id: "benevio-labs.near",
+          tokens: { [best_quote.get("token_out")]: referral_fee_amount },
+          memo: "referral_fee"
+        });
+      }
+
+      // Sign the payload.
+      const walletSelector = await this.selector;
+      const selectedWallet = await walletSelector.wallet();
+      const recipient = "intents.near";
+      const callbackUrl = undefined; //TODO
+      const signedPayload = await selectedWallet.signMessage({message:JSON.stringify(payload), nonce:nonce, recipient: recipient, callbackUrl: callbackUrl});
+
+      // Publish the signed intent via the RPC endpoint.
       const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-             id: "dontcare",
-             jsonrpc: "2.0",
-             method: "publish_intent",
-             params: intents
-          })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: "dontcare",
+          jsonrpc: "2.0",
+          method: "publish_intent",
+          params: signedPayload
+        })
       });
+
       const published = await rpcResponse.json();
       console.log("Swap published intent result:", published);
       return published;
@@ -330,7 +365,7 @@ export class Wallet {
                "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": amount
              },
              referral: "near-intents.intents-referral.near"
-           }
+           },
          ]
       };
 
