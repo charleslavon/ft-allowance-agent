@@ -51,13 +51,7 @@ export class Wallet {
     this.selector = setupWalletSelector({
       network: this.networkId,
       modules: [
-        setupMyNearWallet(),
-        setupHereWallet(),
-        setupLedger(),
-        setupMeteorWallet(),
-        setupSender(),
         setupBitteWallet(),
-        setupEthereumWallets({ wagmiConfig, web3Modal, alwaysOnboardDuringSignIn: true }),
       ],
     });
 
@@ -209,12 +203,12 @@ export class Wallet {
     const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
     // Retrieve account state from the network
-    console.log("--", provider)
     const keys = await provider.query({
       request_type: 'view_access_key_list',
       account_id: accountId,
       finality: 'final',
     });
+    console.log("--", keys)
     return keys.keys;
   };
 

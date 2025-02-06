@@ -15,9 +15,9 @@ export default function Home() {
   const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: "LOADING" });
 
   // New state variables to parameterize deposit, swap and withdraw amounts
-  const [depositAmount, setDepositAmount] = useState("0.01");
-  const [swapAmount, setSwapAmount] = useState("0.01");
-  const [withdrawAmount, setWithdrawAmount] = useState("0.01");
+  const [depositAmount, setDepositAmount] = useState("1000000000000000000");
+  const [swapAmount, setSwapAmount] = useState("1000000000000000000");
+  const [withdrawAmount, setWithdrawAmount] = useState("1000000000000000000");
   const [logs, setLogs] = useState([]);
 
   // Create and memoize the wallet instance.
@@ -141,9 +141,6 @@ export default function Home() {
           </>
         )}
         <div className="button-group">
-          <button className="test-btn blue" onClick={handleCreateFunctionKey}>
-            Create Function Key
-          </button>
           <button className="test-btn blue" onClick={handleRegister}>
             Register
           </button>
