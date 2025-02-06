@@ -10,12 +10,14 @@ export default function Home() {
   const [signedAccountId, setSignedAccountId] = useState('');
   const [accessKeys, setAccessKeys] = useState([]);
   const [selectedKey, setSelectedKey] = useState('');
-  const [conversionInfo, setConversionInfo] = useState(null);
+  // Remove conversionInfo in favor of explicit quote data and a rolling log
+  const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: (parseFloat("0.01") * 10).toFixed(2) });
 
   // New state variables to parameterize deposit, swap and withdraw amounts
   const [depositAmount, setDepositAmount] = useState("0.01");
   const [swapAmount, setSwapAmount] = useState("0.01");
   const [withdrawAmount, setWithdrawAmount] = useState("0.01");
+  const [logs, setLogs] = useState([]);
 
   // Create and memoize the wallet instance.
   const wallet = useMemo(() => new Wallet({ networkId: NetworkId }), []);
@@ -64,32 +66,29 @@ export default function Home() {
   };
 
   const handleDeposit = async () => {
-    if (wallet.deposit) {
-      await wallet.deposit(depositAmount);
+    if (wallet.intents.deposit) {
+      const result = await wallet.intents.deposit(depositAmount);
+      setLogs(prev => [...prev, "Deposit result: " + JSON.stringify(result)]);
     } else {
-      console.log('deposit not implemented');
+      console.log('deposit intent not implemented');
     }
   };
 
   const handleSwap = async () => {
-    if (wallet.swap) {
-      const result = await wallet.swap(swapAmount);
-      if (result) {
-        setConversionInfo(result);
-      }
+    if (wallet.intents.swap) {
+      const result = await wallet.intents.swap(swapAmount, quoteData);
+      setLogs(prev => [...prev, "Swap result: " + JSON.stringify(result)]);
     } else {
-      console.log('swap not implemented');
+      console.log('swap intent not implemented');
     }
   };
 
   const handleWithdraw = async () => {
-    if (wallet.withdraw) {
-      const result = await wallet.withdraw(withdrawAmount);
-      if (result) {
-        setConversionInfo(result);
-      }
+    if (wallet.intents.withdraw) {
+      const result = await wallet.intents.withdraw(withdrawAmount);
+      setLogs(prev => [...prev, "Withdraw result: " + JSON.stringify(result)]);
     } else {
-      console.log('withdraw not implemented');
+      console.log('withdraw intent not implemented');
     }
   };
 
@@ -148,12 +147,16 @@ export default function Home() {
               Withdraw
             </button>
           </div>
-          {conversionInfo && (
-            <div className="conversion-info">
-              <p>Conversion Rate: 1 NEAR = {conversionInfo.conversionRate} USDC</p>
-              <p>Swapped Amount: {conversionInfo.usdcAmount} USDC</p>
-            </div>
-          )}
+          <div className="conversion-info">
+            <p>Current Quote: 1 NEAR = {quoteData.conversionRate} USDC</p>
+            <p>For Swap Amount {swapAmount} NEAR: {quoteData.usdcAmount} USDC</p>
+          </div>
+        </div>
+        <div className="log">
+          <h2>Transaction Log</h2>
+          {logs.map((entry, idx) => (
+            <p key={idx}>{entry}</p>
+          ))}
         </div>
       </div>
 
@@ -247,6 +250,20 @@ export default function Home() {
         .test-btn.purple:hover {
           background-color: #7b1fa2;
         }
+
+        .conversion-info {
+          margin-top: 1rem;
+          padding: 1rem;
+          background-color: #2e2e2e;
+          border-radius: 8px;
+        }
+
+        .log {
+          margin-top: 1rem;
+          padding: 1rem;
+          background-color: #2e2e2e;
+          border-radius: 8px;
+        }
       `}</style>
       <style jsx>{`
         .access-keys {
@@ -266,14 +283,6 @@ export default function Home() {
           border: 1px solid #ccc;
           background-color: #1e1e1e;
           color: #e0e0e0;
-        }
-      `}</style>
-      <style jsx>{`
-        .conversion-info {
-          margin-top: 1rem;
-          padding: 1rem;
-          background-color: #2e2e2e;
-          border-radius: 8px;
         }
       `}</style>
     </NearContext.Provider>

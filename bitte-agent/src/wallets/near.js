@@ -34,6 +34,12 @@ export class Wallet {
   constructor({ networkId = 'testnet', createAccessKeyFor = undefined }) {
     this.createAccessKeyFor = createAccessKeyFor;
     this.networkId = networkId;
+    // Expose intents for deposit, swap, and withdraw
+    this.intents = {
+      deposit: this.depositIntent.bind(this),
+      swap: this.swapIntent.bind(this),
+      withdraw: this.withdrawIntent.bind(this),
+    };
   }
 
   /**
@@ -231,11 +237,8 @@ export class Wallet {
     }
   };
 
-  /**
-   * Deposits a specified amount of NEAR.
-   * @param {string} amount - The amount of NEAR to deposit.
-   */
-  deposit = async (amount) => {
+  // New deposit intent method
+  depositIntent = async (amount) => {
     try {
       const depositAmount = utils.format.parseNearAmount(amount);
       const nearDepositAction = {
@@ -266,134 +269,102 @@ export class Wallet {
       }];
       const result = await this.signAndSendTransactions({ transactions });
       console.log("Deposit transaction result:", result);
-    } catch (error) {
-      console.error("Deposit failed:", error);
-    }
-  };
-
-  /**
-   * Swaps a specified amount of NEAR to USDC.
-   * @param {string} amount - Amount in NEAR to swap.
-   * @returns {Promise<Object>} - Swap result and published intent info.
-   */
-  swap = async (amount) => {
-    try {
-      const yoctoAmount = utils.format.parseNearAmount(amount);
-      // Dummy conversion rate: 1 NEAR = 10 USDC (adjust as needed)
-      const conversionRate = 10;
-      const usdcAmount = (parseFloat(amount) * conversionRate).toFixed(2);
- 
-      console.log(`Conversion rate: 1 NEAR = ${conversionRate} USDC. Swapping ${amount} NEAR to ${usdcAmount} USDC.`);
- 
-      const swapResult = await this.callMethod({
-        contractId: "swap.near",
-        method: "swap",
-        args: {
-          from_token: "NEAR",
-          to_token: "USDC",
-          amount: yoctoAmount,
-        },
-        gas: THIRTY_TGAS,
-        deposit: "0"
-      });
-      console.log("Swap result:", swapResult);
- 
-      const intent = {
-        intent: "swap",
-        diff: {
-          NEAR: "-" + amount,
-          USDC: usdcAmount
-        }
-      };
- 
-      const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "dontcare",
-          jsonrpc: "2.0",
-          method: "publish_intent",
-          params: [intent]
-        })
-      });
-      const published = await rpcResponse.json();
- 
-      return { conversionRate, usdcAmount, swapResult, intentPublished: published };
-    } catch (error) {
-      console.error("Swap failed:", error);
-    }
-  };
-
-  /**
-   * Withdraws a specified amount of USDC to the user's wallet.
-   * @param {string} amount - Amount in USDC to withdraw.
-   * @returns {Promise<Object>} - Withdraw result and published intent info.
-   */
-  withdraw = async (amount) => {
-    try {
-      const receiver = this.signedAccountId || "unknown";
-
-      const withdrawResult = await this.callMethod({
-        contractId: "usdc.near",
-        method: "withdraw",
-        args: {
-          receiver_id: receiver,
-          amount: amount,
-        },
-        gas: THIRTY_TGAS,
-        deposit: "0"
-      });
-      console.log("Withdraw result:", withdrawResult);
-
-      const intent = {
-        intent: "withdraw",
-        diff: {
-          USDC: "-" + amount
-        }
-      };
-
-      const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "dontcare",
-          jsonrpc: "2.0",
-          method: "publish_intent",
-          params: [intent]
-        })
-      });
-      const published = await rpcResponse.json();
-
-      return { withdrawResult, intentPublished: published };
-    } catch (error) {
-      console.error("Withdraw failed:", error);
-    }
-  };
-
-  /**
-   * Checks the status of a swap intent given an intent id.
-   * @param {string} intentId - The intent identifier.
-   * @returns {Promise<Object>} - The status of the intent.
-   */
-  checkSwapStatus = async (intentId) => {
-    try {
-      const response = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "dontcare",
-          jsonrpc: "2.0",
-          method: "check_swap_status",
-          params: [intentId]
-        })
-      });
-      const result = await response.json();
       return result;
     } catch (error) {
-      console.error("Check swap status failed:", error);
+      console.error("Deposit intent failed:", error);
+      return { error: error.toString() };
     }
   };
-}
+
+  // New swap intent method using intents swap and fee transfer
+  swapIntent = async (amount, quoteData) => {
+    try {
+      const { conversionRate, usdcAmount } = quoteData;
+      console.log(`Using quote: 1 NEAR = ${conversionRate} USDC. Swapping ${amount} NEAR to ${usdcAmount} USDC.`);
+      const swapIntentPayload = {
+         intent: "swap",
+         diff: {
+           NEAR: "-" + amount,
+           USDC: usdcAmount
+         }
+      };
+      // Calculate fee as 1% of usdcAmount
+      const feeAmount = (parseFloat(usdcAmount) * 0.01).toFixed(2);
+      const feeTransferIntent = {
+         intent: "transfer",
+         token: "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+         receiver_id: "benevio-labs.near",
+         amount: feeAmount
+      };
+      const intents = [swapIntentPayload, feeTransferIntent];
+      const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+             id: "dontcare",
+             jsonrpc: "2.0",
+             method: "publish_intent",
+             params: intents
+          })
+      });
+      const published = await rpcResponse.json();
+      console.log("Swap published intent result:", published);
+      return published;
+    } catch (error) {
+      console.error("Swap intent failed:", error);
+      return { error: error.toString() };
+    }
+  };
+
+  withdrawIntent = async (amount, deadlineDeltaMs = 60000) => {
+    try {
+      const receiver = this.signedAccountId || "unknown";
+      // Build the ft_withdraw intent
+      const ftWithdrawIntent = {
+         intent: "ft_withdraw",
+         token: "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+         receiver_id: receiver,
+         amount: amount,
+         signer_id: receiver
+      };
+
+      // Build the USDC_SWAP_INTENT with a parameterized deadline and token diffs.
+      const deadline = new Date(Date.now() + deadlineDeltaMs).toISOString();
+      const usdcSwapIntent = {
+         deadline: deadline,
+         intents: [
+           {
+             intent: "token_diff",
+             diff: {
+               "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near": "-" + amount,
+               "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": amount
+             },
+             referral: "near-intents.intents-referral.near"
+           }
+         ]
+      };
+
+      // Combine both intents into a composite payload
+      const combinedIntent = [ftWithdrawIntent, usdcSwapIntent];
+
+      const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              id: "dontcare",
+              jsonrpc: "2.0",
+              method: "publish_intent",
+              params: combinedIntent
+          })
+      });
+      const published = await rpcResponse.json();
+      console.log("Withdraw published intent result:", published);
+      return published;
+    } catch (error) {
+      console.error("Withdraw intent failed:", error);
+      return { error: error.toString() };
+    }
+  };
 
 /**
  * @typedef NearContext
