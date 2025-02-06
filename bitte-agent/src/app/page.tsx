@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { NearContext, Wallet } from '@/wallets/near';
 import { NetworkId } from '@/config';
+import { getQuotes } from '@/utils/getQuotes';
 
 export default function Home() {
   // Track the current signed-in account ID.
@@ -11,7 +12,7 @@ export default function Home() {
   const [accessKeys, setAccessKeys] = useState([]);
   const [selectedKey, setSelectedKey] = useState('');
   // Remove conversionInfo in favor of explicit quote data and a rolling log
-  const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: (parseFloat("0.01") * 10).toFixed(2) });
+  const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: "LOADING" });
 
   // New state variables to parameterize deposit, swap and withdraw amounts
   const [depositAmount, setDepositAmount] = useState("0.01");
@@ -43,6 +44,21 @@ export default function Home() {
     }
     fetchAccessKeys();
   }, [signedAccountId, wallet]);
+
+  // Lookup real quote data using the translated getQuotes function based on swapAmount
+  useEffect(() => {
+    async function fetchQuote() {
+      const tokenInId = "nep141:wrap.near";
+      const assetIdentifierOut = "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1";
+      const { bestQuote } = await getQuotes(tokenInId, "100000000000000000000", assetIdentifierOut);
+      console.log(">", bestQuote, tokenInId, assetIdentifierOut);
+      if (bestQuote && bestQuote.amount_in && bestQuote.amount_out) {
+        const conversionRate = (parseFloat(bestQuote.amount_out) / parseFloat(bestQuote.amount_in)).toFixed(2);
+        setQuoteData({ conversionRate, usdcAmount: (parseFloat(bestQuote.amount_out)/100 ).toFixed(2)});
+      }
+    }
+    fetchQuote();
+  }, [swapAmount]);
 
   // Determine the authentication action and label.
   const handleAuthAction = signedAccountId ? wallet.signOut : wallet.signIn;
@@ -103,10 +119,9 @@ export default function Home() {
         </button>
       </header>
       <div className="content">
-        <h1>Test Flow</h1>
+        <h1>NEAR Intents Test Flow</h1>
         {signedAccountId && (
           <>
-            <p className="user-info">Logged in as: {signedAccountId}</p>
             {accessKeys.length > 0 && (
               <div className="access-keys">
                 <label htmlFor="accessKeySelect">Select Access Key:</label>
@@ -148,8 +163,7 @@ export default function Home() {
             </button>
           </div>
           <div className="conversion-info">
-            <p>Current Quote: 1 NEAR = {quoteData.conversionRate} USDC</p>
-            <p>For Swap Amount {swapAmount} NEAR: {quoteData.usdcAmount} USDC</p>
+            <p>Current Quote: 1 NEAR = {quoteData.usdcAmount} USDC</p>
           </div>
         </div>
         <div className="log">

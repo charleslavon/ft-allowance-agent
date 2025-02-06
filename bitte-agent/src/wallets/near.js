@@ -365,6 +365,7 @@ export class Wallet {
       return { error: error.toString() };
     }
   };
+}
 
 /**
  * @typedef NearContext
