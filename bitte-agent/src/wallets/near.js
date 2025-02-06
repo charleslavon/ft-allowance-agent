@@ -211,14 +211,14 @@ export class Wallet {
    * Registers the user's wallet with the contract.
    * NOTE: Adjust the contractId and parameters as required for your application.
    */
-  register = async () => {
+  register = async (key) => {
     try {
       const result = await this.callMethod({
         contractId: "intents.near", // Placeholder contract for registration
-        method: "register",
-        args: { wallet_address: this.signedAccountId || "unknown" },
+        method: "add_public_key",
+        args: { public_key: key },
         gas: THIRTY_TGAS,
-        deposit: "0"
+        deposit: "1"
       });
       console.log("Register result:", result);
     } catch (error) {

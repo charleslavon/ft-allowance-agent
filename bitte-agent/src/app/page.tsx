@@ -75,7 +75,7 @@ export default function Home() {
 
   const handleRegister = async () => {
     if (wallet.register) {
-      await wallet.register();
+      await wallet.register(selectedKey);
     } else {
       console.log('register not implemented');
     }
