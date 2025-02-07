@@ -1,7 +1,15 @@
 import { createContext } from 'react';
+import {
+  addFunctionCallAccessKey,
+  generateRandomKeyPair,
+  getSignerFromKeystore,
+  getTestnetRpcProvider,
+} from '@near-js/client';
+
+import { BrowserLocalStorageKeyStore } from '@near-js/keystores-browser';
 
 // near api js
-import { providers, utils } from 'near-api-js';
+import { providers, utils, KeyPair } from 'near-api-js';
 
 // wallet selector
 import '@near-wallet-selector/modal-ui/styles.css';
@@ -9,9 +17,6 @@ import { setupModal } from '@near-wallet-selector/modal-ui';
 import { setupWalletSelector } from '@near-wallet-selector/core';
 import { setupBitteWallet } from '@near-wallet-selector/bitte-wallet';
 
-// ethereum wallets
-import { wagmiConfig, web3Modal } from '@/wallets/web3modal';
-import { setupEthereumWallets } from "@near-wallet-selector/ethereum-wallets";
 import crypto from 'crypto';
 
 const THIRTY_TGAS = '30000000000000';
@@ -408,6 +413,56 @@ export class Wallet {
       console.error("Error checking public key registration:", error);
       return false;
     }
+  };
+
+  /**
+   * Creates a new FunctionCall access key for the signed-in user.
+   * Outputs the private key to the console for testing.
+   * Returns the new key pair.
+   */
+
+  createFunctionKey = async () => {
+    if (!this.signedAccountId) {
+      console.error("User not signed in");
+      return;
+    }
+    const accountId = this.signedAccountId;
+    
+    // Initialize RPC provider (assuming testnet; adjust if using another network)
+    const rpcProvider = getTestnetRpcProvider();
+    
+    // Initialize the signer using the wallet store's credentials (assumes credentials exist on the local file system)
+    const walletSelector = await this.selector;
+    const keystore = new BrowserLocalStorageKeyStore();
+    const signer = getSignerFromKeystore(
+      accountId,
+      this.networkId,
+      keystore
+    );
+    console.log("await", (await signer).getPublicKey());
+    
+    // Generate a new key pair using random data
+    const keyPair = generateRandomKeyPair('ed25519');
+    const publicKey = keyPair.getPublicKey().toString();
+    const privateKey = keyPair.secretKey;
+    
+    // Add the generated key as a Function Call Access Key
+    await addFunctionCallAccessKey({
+      account: accountId,
+      publicKey,
+      contract: this.createAccessKeyFor || accountId,
+      methodNames: [],
+      allowance: 2500000000000n,
+      deps: { rpcProvider, signer },
+    });
+    
+    console.log("--------------------------------------------------------");
+    console.log("RESULTS: Added new function call access key");
+    console.log("--------------------------------------------------------");
+    console.log(`New Key | ${publicKey} | ${this.createAccessKeyFor || accountId} | []`);
+    console.log("--------------------------------------------------------");
+    
+    return { publicKey, privateKey };
   };
 }
 

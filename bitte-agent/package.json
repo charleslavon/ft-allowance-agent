@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@bitte-ai/agent-sdk": "0.1.7",
+    "@near-js/client": "^0.0.2",
     "@near-wallet-selector/bitte-wallet": "^8.9.13",
     "@near-wallet-selector/core": "^8.9.13",
     "@near-wallet-selector/modal-ui": "^8.9.13",
-    "wagmi": "^2.12.16",
     "@web3modal/wagmi": "^5.1.10",
     "near-api-js": "^5.0.1",
     "near-safe": "0.9.10",
@@ -23,19 +23,20 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "vercel-url": "0.2.6",
-    "viem": "2.22.19"
+    "viem": "2.22.19",
+    "wagmi": "^2.12.16"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
     "@types/node": "22.13.0",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
     "concurrently": "9.1.2",
-    "make-agent": "^0.2.1",
-    "typescript": "5.7.3",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^3.4.17",
     "eslint": "^9.19.0",
     "eslint-config-next": "15.1.6",
-    "@eslint/eslintrc": "^3.2.0"
+    "make-agent": "^0.2.1",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.7.3"
   }
 }
