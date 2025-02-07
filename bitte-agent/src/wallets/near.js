@@ -205,7 +205,6 @@ export class Wallet {
       account_id: accountId,
       finality: 'final',
     });
-    console.log("--", keys)
     return keys.keys;
   };
 
@@ -222,7 +221,6 @@ export class Wallet {
         gas: THIRTY_TGAS,
         deposit: "1"
       });
-      console.log("Register result:", result);
     } catch (error) {
       console.error("Register failed:", error);
     }
@@ -232,7 +230,6 @@ export class Wallet {
   depositIntent = async (amount) => {
     try {
       const depositAmount = utils.format.parseNearAmount(amount);
-      console.log("deposit amount", amount, depositAmount);
       const nearDepositAction = {
         type: 'FunctionCall',
         params: {
@@ -260,7 +257,6 @@ export class Wallet {
         actions: [nearDepositAction, ftTransferCallAction]
       }];
       const result = await this.signAndSendTransactions({ transactions });
-      console.log("Deposit transaction result:", result);
       return result;
     } catch (error) {
       console.error("Deposit intent failed:", error);
@@ -322,9 +318,7 @@ export class Wallet {
       const callbackUrl = undefined; //TODO
 
       const nonce = crypto.randomBytes(32);
-      console.log('nonce', nonce);
       const msg =  {message:JSON.stringify(payload), nonce:nonce, recipient: recipient, callbackUrl: callbackUrl};
-      console.log('sign', msg);
       const signedPayload = await selectedWallet.signMessage(msg);
 
       // Publish the signed intent via the RPC endpoint.
@@ -340,7 +334,6 @@ export class Wallet {
       });
 
       const published = await rpcResponse.json();
-      console.log("Swap published intent result:", published);
       return published;
     } catch (error) {
       console.error("Swap intent failed:", error);
@@ -390,7 +383,6 @@ export class Wallet {
           })
       });
       const published = await rpcResponse.json();
-      console.log("Withdraw published intent result:", published);
       return published;
     } catch (error) {
       console.error("Withdraw intent failed:", error);

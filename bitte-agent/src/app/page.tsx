@@ -68,7 +68,16 @@ export default function Home() {
   // Handlers for test buttons (ensure these functions exist in your Wallet class)
   const handleCreateFunctionKey = async () => {
     if (wallet.createFunctionKey) {
-      await wallet.createFunctionKey();
+      const newKey = await wallet.createFunctionKey();
+      if (newKey) {
+        console.log("New function key created with private key (for testing):", newKey.privateKey);
+        const newAccessKey = {
+          public_key: newKey.publicKey,
+          access_key: { permission: { FunctionCall: true } }
+        };
+        setAccessKeys(prev => [...prev, newAccessKey]);
+        setSelectedKey(newAccessKey);
+      }
     } else {
       console.log('createFunctionKey not implemented');
     }
@@ -180,6 +189,11 @@ export default function Home() {
               Withdraw
             </button>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="test-btn orange" onClick={handleCreateFunctionKey}>
+              Add FunctionCall Key
+            </button>
+          </div>
           <div className="conversion-info">
             <p>Current Quote: 1 NEAR = {quoteData.usdcAmount} USDC</p>
           </div>
@@ -281,6 +295,13 @@ export default function Home() {
         }
         .test-btn.purple:hover {
           background-color: #7b1fa2;
+        }
+        .test-btn.orange {
+          background-color: #ff9800;
+          color: #fff;
+        }
+        .test-btn.orange:hover {
+          background-color: #fb8c00;
         }
 
         .conversion-info {
