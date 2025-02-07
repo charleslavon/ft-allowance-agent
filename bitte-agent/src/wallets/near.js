@@ -19,6 +19,7 @@ import { setupBitteWallet } from '@near-wallet-selector/bitte-wallet';
 
 import crypto from 'crypto';
 
+import { getQuotes } from '@/utils/getQuotes';
 const THIRTY_TGAS = '30000000000000';
 const NO_DEPOSIT = '0';
 
@@ -269,61 +270,77 @@ export class Wallet {
     }
   };
 
-  // New swap intent method using intents swap and fee transfer
   swapIntent = async (amount, quoteData, deadlineDeltaMs = 60000) => {
     try {
-      if (!this.signedAccountId) {
-        throw new Error("Wallet is not signed in");
-      }
-
-      // Set a deadline (e.g. 60 seconds from now)
-      const deadline = new Date(Date.now() + deadlineDeltaMs).toISOString();
-
-      // Convert the NEAR amount (e.g. "0.103826755259393477016974") to yoctoNEAR.
+      // Convert provided NEAR amount to yoctoNEAR.
       const nearAmountYocto = utils.format.parseNearAmount(amount);
       if (!nearAmountYocto) {
         throw new Error("Invalid NEAR amount provided.");
       }
 
-      // Build the diff object.
-      // Here we assume that:
-      // - "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near" represents USDC,
-      // - "nep141:wrap.near" represents wrapped NEAR.
-      const diff = {
-        "nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near": "-" + quoteData.usdcAmount,
-        "nep141:wrap.near": nearAmountYocto
-      };
+      // Define token identifiers.
+      const tokenInId = "nep141:wrap.near";
+      const assetIdentifierOut = "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1";
 
-      // Construct the full payload matching the expected structure.
+      // Retrieve the best quote.
+      const { bestQuote } = await getQuotes(tokenInId, nearAmountYocto, assetIdentifierOut);
+      if (!bestQuote) {
+        throw new Error("No best quote returned from getQuotes");
+      }
+
+      // Calculate referral fee (1% of amount_out) and net output.
+      const referralFeeAmount = String(Math.floor(parseInt(bestQuote.amount_out) / 100));
+      const amountOutLessFee = String(parseInt(bestQuote.amount_out) - parseInt(referralFeeAmount));
+
+      // Set a deadline (e.g., 60 seconds from now).
+      const deadline = new Date(Date.now() + deadlineDeltaMs).toISOString();
+
+      // Generate a random nonce (32 bytes).
+      const nonce = crypto.randomBytes(32);
+
+      // Construct the payload matching the Python reference.
       const payload = {
-        deadline,
+        signer_id: this.signedAccountId,
+        nonce: nonce,
+        verifying_contract: "intents.near",
+        deadline: deadline,
         intents: [
           {
             intent: "token_diff",
-            diff,
-            referral: "near-intents.intents-referral.near"
+            diff: {
+              [bestQuote.token_in]: "-" + bestQuote.amount_in,
+              [bestQuote.token_out]: amountOutLessFee,
+            },
+            referral: "benevio-labs.near"
+          },
+          {
+            intent: "transfer",
+            receiver_id: "benevio-labs.near",
+            tokens: {
+              [bestQuote.token_out]: referralFeeAmount
+            },
+            memo: "referral_fee"
           }
-        ],
-        signer_id: this.signedAccountId,
+        ]
       };
-      const chargeFee = false; //TODO
-      if (chargeFee) {
-        payload.intents.push({
-          intent: "transfer",
-          receiver_id: "benevio-labs.near",
-          tokens: { [best_quote.get("token_out")]: referral_fee_amount },
-          memo: "referral_fee"
-        });
+
+      // Ensure the user is signed in.
+      if (!this.signedAccountId) {
+        throw new Error("Wallet is not signed in");
       }
 
-      // Sign the payload.
+      // Prepare the message for signing.
+      const recipient = "intents.near";
+      const msg = {
+        message: JSON.stringify(payload),
+        nonce: nonce,
+        recipient: recipient,
+        callbackUrl: undefined
+      };
+
+      // Get the wallet and sign the message.
       const walletSelector = await this.selector;
       const selectedWallet = await walletSelector.wallet();
-      const recipient = "intents.near";
-      const callbackUrl = undefined; //TODO
-
-      const nonce = crypto.randomBytes(32);
-      const msg =  {message:JSON.stringify(payload), nonce:nonce, recipient: recipient, callbackUrl: callbackUrl};
       const signedPayload = await selectedWallet.signMessage(msg);
 
       // Publish the signed intent via the RPC endpoint.
