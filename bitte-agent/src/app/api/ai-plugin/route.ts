@@ -73,7 +73,15 @@ paths: {
                                             }
                                         }
                                     },
-                                    totalUsdValue: { type: "string" }
+                                    totalUsdValue: { type: "string" },
+                                    accountId: {
+                                        type: "string",
+                                        description: "The user's account ID",
+                                    },
+                                    evmAddress: {
+                                        type: "string",
+                                        description: "The user's MPC EVM address",
+                                    },
                                 }
                             }
                         }

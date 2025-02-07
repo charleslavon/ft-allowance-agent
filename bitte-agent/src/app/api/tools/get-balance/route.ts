@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 export async function GET() {
+  const mbMetadataHeader = (await headers()).get('mb-metadata');
+  const mbMetadata: { accountId: string; evmAddress: string } | undefined =
+    mbMetadataHeader && JSON.parse(mbMetadataHeader);
+
+  let { accountId, evmAddress } = mbMetadata || {};
+  if (!accountId) {
+    console.error('No user information in header', mbMetadata);
+  }
   try {
     // Get current timestamp
     const now = Date.now();
@@ -28,6 +37,15 @@ export async function GET() {
       ],
       totalUsdValue: "800.75"
     };
+    if(accountId == undefined) {
+      accountId = 'dev.testnet';
+    }
+    if(evmAddress == undefined) {
+      evmAddress = '0xevmAddress-dev';
+    }
+
+    mockPortfolioHistory['accountId'] = accountId;
+    mockPortfolioHistory['evmAddress'] = evmAddress;
 
     return NextResponse.json(mockPortfolioHistory);
   } catch (error) {
