@@ -95,7 +95,7 @@ export async function swapIntent(amount, quoteData, deadlineDeltaMs = 60000) {
         },
         {
           intent: "transfer",
-          receiver_id: "benevio-labs.near",
+          receiver_id: "chaotic_protocolpilot.near",//"benevio-labs.near",
           tokens: {
             [bestQuote.token_out]: referralFeeAmount
           },

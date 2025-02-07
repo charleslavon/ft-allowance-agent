@@ -16,9 +16,9 @@ export default function Home() {
   const [quoteData, setQuoteData] = useState({ conversionRate: 10, usdcAmount: "LOADING" });
 
   // New state variables to parameterize deposit, swap and withdraw amounts
-  const [depositAmount, setDepositAmount] = useState("0.01");
-  const [swapAmount, setSwapAmount] = useState("0.01");
-  const [withdrawAmount, setWithdrawAmount] = useState("0.01");
+  const [depositAmount, setDepositAmount] = useState("0.001");
+  const [swapAmount, setSwapAmount] = useState("0.001");
+  const [withdrawAmount, setWithdrawAmount] = useState("0.001");
   const [logs, setLogs] = useState([]);
   const [intentBalances, setIntentBalances] = useState({ near: null, usdc: null });
 
