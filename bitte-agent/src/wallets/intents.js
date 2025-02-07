@@ -2,7 +2,8 @@ import { utils } from 'near-api-js';
 import crypto from 'crypto';
 import { getQuotes } from '@/utils/getQuotes';
 
-const THIRTY_TGAS = '30000000000000';
+
+const MAX_GAS = '80000000000000';
 
 /**
  * Deposit intent: builds and sends transactions to deposit NEAR.
@@ -12,14 +13,15 @@ const THIRTY_TGAS = '30000000000000';
 export async function depositIntent(amount) {
   try {
     const depositAmount = utils.format.parseNearAmount(amount);
+    console.log("deposit", depositAmount);
     const nearDepositAction = {
       type: 'FunctionCall',
       params: {
         methodName: 'near_deposit',
         args: {},
-        gas: THIRTY_TGAS,
+        gas: MAX_GAS,
         deposit: depositAmount,
-      }
+      },
     };
     const ftTransferCallAction = {
       type: 'FunctionCall',
@@ -28,10 +30,10 @@ export async function depositIntent(amount) {
         args: {
           receiver_id: "intents.near",
           amount: depositAmount,
-          msg: ""
+          msg: "",
         },
-        gas: THIRTY_TGAS,
-        deposit: "1",
+        gas: MAX_GAS,
+        deposit: "1"
       }
     };
     const transactions = [{
