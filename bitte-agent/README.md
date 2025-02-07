@@ -35,8 +35,10 @@ npx next dev
 #### Standard Development
 1. In node_modules/make-agent:
 ```bash
-npx bun run ./src/index.ts dev-deprecated --port 3000 -t
+npx bun run ./src/index.ts dev --port 3000 -t
 ```
+
+-t is for testnet
 
 2. In the base directory:
 ```bash
