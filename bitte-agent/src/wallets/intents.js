@@ -213,3 +213,22 @@ export async function hasPublicKey(key) {
     return false;
   }
 }
+
+/**
+ * Gets the balance of a token for the current account via intents.
+ * @param {string} tokenId - The token identifier.
+ * @returns {Promise<string|number>} - The token balance (as returned by the contract).
+ */
+export async function getTokenBalance(tokenId) {
+  try {
+    const result = await this.viewMethod({
+      contractId: "intents.near",
+      method: "mt_balance_of",
+      args: { account_id: this.signedAccountId, token_id: tokenId },
+    });
+    return result;
+  } catch (error) {
+    console.error("Error fetching token balance:", error);
+    return "0";
+  }
+}

@@ -20,6 +20,7 @@ export default function Home() {
   const [swapAmount, setSwapAmount] = useState("0.01");
   const [withdrawAmount, setWithdrawAmount] = useState("0.01");
   const [logs, setLogs] = useState([]);
+  const [intentBalances, setIntentBalances] = useState({ near: null, usdc: null });
 
   // Create and memoize the wallet instance.
   const wallet = useMemo(() => new Wallet({ networkId: NetworkId }), []);
@@ -133,6 +134,24 @@ export default function Home() {
     checkRegistration();
   }, [signedAccountId, selectedKey, wallet]);
 
+  // Fetch intent token balances for NEAR and USDC
+  useEffect(() => {
+    async function fetchIntentBalances() {
+      if (signedAccountId && wallet.intents.getTokenBalance) {
+        const nearTokenId = "nep141:wrap.near";
+        const usdcTokenId = "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1";
+        try {
+          const nearBalance = await wallet.intents.getTokenBalance(nearTokenId);
+          const usdcBalance = await wallet.intents.getTokenBalance(usdcTokenId);
+          setIntentBalances({ near: nearBalance, usdc: usdcBalance });
+        } catch (error) {
+          console.error("Failed to fetch intent balances:", error);
+        }
+      }
+    }
+    fetchIntentBalances();
+  }, [signedAccountId, wallet, swapAmount]);
+
   return (
     <NearContext.Provider value={{ wallet, signedAccountId }}>
       <header className="header">
@@ -196,6 +215,10 @@ export default function Home() {
           </div>
           <div className="conversion-info">
             <p>Current Quote: 1 NEAR = {quoteData.usdcAmount} USDC</p>
+          </div>
+          <div className="intent-balances">
+            <p>Intent NEAR Balance: {intentBalances.near ?? "Loading..."}</p>
+            <p>Intent USDC Balance: {intentBalances.usdc ?? "Loading..."}</p>
           </div>
         </div>
         <div className="log">
@@ -336,6 +359,14 @@ export default function Home() {
           border: 1px solid #ccc;
           background-color: #1e1e1e;
           color: #e0e0e0;
+        }
+      `}</style>
+      <style jsx>{`
+        .intent-balances {
+          margin-top: 1rem;
+          padding: 1rem;
+          background-color: #2e2e2e;
+          border-radius: 8px;
         }
       `}</style>
     </NearContext.Provider>

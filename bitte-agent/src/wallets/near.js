@@ -22,7 +22,7 @@ import crypto from 'crypto';
 import { getQuotes } from '@/utils/getQuotes';
 
 // Import intent functions from the separate module.
-import { depositIntent, swapIntent, withdrawIntent, hasPublicKey } from './intents';
+import { depositIntent, swapIntent, withdrawIntent, hasPublicKey, getTokenBalance } from './intents';
 
 const THIRTY_TGAS = '30000000000000';
 const NO_DEPOSIT = '0';
@@ -46,6 +46,7 @@ export class Wallet {
       swap: swapIntent.bind(this),
       withdraw: withdrawIntent.bind(this),
       hasPublicKey: hasPublicKey.bind(this),
+      getTokenBalance: getTokenBalance.bind(this),
     };
   }
 
