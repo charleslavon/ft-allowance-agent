@@ -12,6 +12,7 @@ import { setupBitteWallet } from '@near-wallet-selector/bitte-wallet';
 // ethereum wallets
 import { wagmiConfig, web3Modal } from '@/wallets/web3modal';
 import { setupEthereumWallets } from "@near-wallet-selector/ethereum-wallets";
+import crypto from 'crypto';
 
 const THIRTY_TGAS = '30000000000000';
 const NO_DEPOSIT = '0';
@@ -231,6 +232,7 @@ export class Wallet {
   depositIntent = async (amount) => {
     try {
       const depositAmount = utils.format.parseNearAmount(amount);
+      console.log("deposit amount", amount, depositAmount);
       const nearDepositAction = {
         type: 'FunctionCall',
         params: {
@@ -267,7 +269,7 @@ export class Wallet {
   };
 
   // New swap intent method using intents swap and fee transfer
-  swapIntent = async (amount, quoteData, nonce, deadlineDeltaMs = 60000) => {
+  swapIntent = async (amount, quoteData, deadlineDeltaMs = 60000) => {
     try {
       if (!this.signedAccountId) {
         throw new Error("Wallet is not signed in");
@@ -318,7 +320,12 @@ export class Wallet {
       const selectedWallet = await walletSelector.wallet();
       const recipient = "intents.near";
       const callbackUrl = undefined; //TODO
-      const signedPayload = await selectedWallet.signMessage({message:JSON.stringify(payload), nonce:nonce, recipient: recipient, callbackUrl: callbackUrl});
+
+      const nonce = crypto.randomBytes(32);
+      console.log('nonce', nonce);
+      const msg =  {message:JSON.stringify(payload), nonce:nonce, recipient: recipient, callbackUrl: callbackUrl};
+      console.log('sign', msg);
+      const signedPayload = await selectedWallet.signMessage(msg);
 
       // Publish the signed intent via the RPC endpoint.
       const rpcResponse = await fetch("https://solver-relay-v2.chaindefuser.com/rpc", {

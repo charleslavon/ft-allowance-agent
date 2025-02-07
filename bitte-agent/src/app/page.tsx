@@ -93,7 +93,7 @@ export default function Home() {
 
   const handleSwap = async () => {
     if (wallet.intents.swap) {
-      const result = await wallet.intents.swap(swapAmount, quoteData, selectedKey.access_key.nonce);
+      const result = await wallet.intents.swap(swapAmount, quoteData);
       setLogs(prev => [...prev, "Swap result: " + JSON.stringify(result)]);
     } else {
       console.log('swap intent not implemented');
