@@ -16,6 +16,7 @@ import '@near-wallet-selector/modal-ui/styles.css';
 import { setupModal } from '@near-wallet-selector/modal-ui';
 import { setupWalletSelector } from '@near-wallet-selector/core';
 import { setupBitteWallet } from '@near-wallet-selector/bitte-wallet';
+import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet';
 
 import crypto from 'crypto';
 
@@ -60,6 +61,7 @@ export class Wallet {
       network: this.networkId,
       modules: [
         setupBitteWallet(),
+        setupMyNearWallet()
       ],
     });
 
