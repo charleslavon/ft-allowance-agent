@@ -11,19 +11,24 @@ wip fungible token allowance agent for near.ai
 
 
 ### Minimal AI Agent Demo
-Divvy is a gain-optimizing Defi Agent that capitalizes on market volatility to grow your wealth, by determining which tokens to periodically swap into stablecoins to secure gains without reducing your portfolio below some minimum USD value. Realize these gains for yourself, or setup a conditional recurring allowance for your crypto curious friends & family.
+Divvy is a portfolio optimizing Defi Agent that capitalizes on market volatility to grow your wealth, by determining which tokens to periodically swap into stablecoins to secure gains without reducing your portfolio below some minimum USD value. Realize these gains for yourself, or setup a conditional recurring allowance for your crypto curious friends & family.
 
-Our submissions aim to be strong candidates for these tracks - Proximity: $25K Prize Pool (via autonomous use of near-intents), Bitte $5K Prize Pool for our use of chain abstraction, and the General Track DeFi Agents ($20,000 for 5 best teams) As described [here](https://docs.google.com/document/d/1vRSABmFAgrpsEquisKOZcF6ZR9ydzdjY03sFbyleu18/edit?tab=t.0),  and (this is post-minuimum demo) their Absurd Category- push the boundries with creative, outlandish AI experiments (e.g. send a fraction of your swap % to a friend via phone number or to a 5013c Experimental Arts Organization for a tax deductable donation for US Citizens)
+Our submissions aim to be strong candidates for these tracks - Proximity: $25K Prize Pool (via autonomous use of near-intents), Bitte $5K Prize Pool for our use of chain abstraction, and the General Track DeFi Agents ($20,000 for 5 best teams) As described [here](https://docs.google.com/document/d/1vRSABmFAgrpsEquisKOZcF6ZR9ydzdjY03sFbyleu18/edit?tab=t.0).
 
-1. The Agent is deployed onto Bitte's Agent protocol, which is beneifical for this minimal scope due to it's heavy use of [nextjs scaffolding](https://www.bitte.ai/registry/agent-starter) and easy integration into Bitte Wallet's Agent UI. This chat based interaction in Bitte's UI can be used all the flows which require user interaction to setup an allowance goal.  Originally I thought that we would only leverage Bitte's Agent UI to setup the allowance goal, and when a goal's growth conditions are satisified, it would then trigger a near.ai agent to act on the user's behalf, but I think that's a dependency that can be removed if we can trigger a Bitte agent to run autonomously, similar to [Delta Trade](https://www.bitte.ai/registry/dcaagent.deltatrade.ai)
-1. Hard Requirements for Qualification. A video overview of the agent-building transactions is required. The agent must be hosted to enable testing by the judges. Additionally, the agent must be open source. The Bitte team is available to assist with hosting if needed @ https://t.me/bitteai.
+1. The Agent is deployed to Near.ai, this chat based UI can be used all the flows which require user interaction to setup an allowance goal, then off-chain components monitor a goal's growth conditions and if satisified triggers a notification be sent to the user so they can approve the corresponding deposit/swap/withdraw.
+
+1. Hard Requirements for Qualification. A video overview of the agent-building transactions is required. The agent must be hosted to enable testing by the judges. Additionally, the agent must be open source.
+
 1. Introduction text to describe what the agent can do for its target audience of crypto-native holders of chain-signature supported tokens: "I can help you set a recurring cash-out into stablecoins based off the potential growth in your tokens. Shall we get started?"
-1. [AI prompt users for the info needed for whatever auth solution we land on] e.g. Explain that you can grant the agent a Full Access Key such that it can execute deposits and swaps on your behalf, or you can approve transactions to deploy a swaps-functions contract onto your account and grant the Agent Limited Access to only call this contract.
-  1. e.g. charles.testnet holds ETH-omni, BTC-omni, Near, a swap-functions contract is deployed onto charles.testnet with guardrail logic and support for initiating some number of a set of transactions if that logic passes: deposit, publish_intent, withdraw on wrap.near and intents.near. The agent gets a limited access key to call this method on charles.testnet with the tokenIds and quantity params of its choosing.
-  1. Need to test if this would actually work of whether a LAK's [inability to attach tokens](https://docs.near.org/concepts/protocol/access-keys#function-call-keys) to a function call would be a blocker.
-1. The agent fetches and displays a count of the NEAR, and omni-bridge tokens on a user's account, along with each token's current price, and the current combined USD value of all of these tokens (this can be considered the total minimum portfolio value, growth can be calculated as a difference from this amount.)
+
+1. [AI prompt users for the info needed for whatever auth solution we land on] e.g. Explain that the agent does not have autonomous access to your account, rather you will be prompted to approve swap transactions when an allowance goal's growth targets are trigggered.
+
+1. The agent fetches and displays a count of the NEAR, and omni-ETH tokens on a user's account, along with each token's current price, and the current combined USD value of all of these tokens (this can be considered the total minimum portfolio value, growth can be calculated as a difference from this amount.)
+
 1. The agent prompts the user to create an allowance goal. "What percentage growth rate are you looking to achieve before diversifying into stablecoins?" "Do you have a preference for USDT or USDC stablecoins?"
+
 1. The agent confirms the input params needed to setup an allowance goal
+
 1. The agent should be able to provide the user with an update on the status of their currently active allowance goals. e.g. a textual representation of the Activity section from the UI design
    <img width="660" alt="Allowance Activity" src="https://github.com/user-attachments/assets/975c0071-7186-4932-8361-81a36dbf31f8" />
 
@@ -31,13 +36,13 @@ Our submissions aim to be strong candidates for these tracks - Proximity: $25K P
 
 ## Demo Flow (3 minutes)
 1. **Introduction (1 minute, 15 seconds)**
-We need to make it clear that we intend our submission for 4 prize tracks: Defi, Proximity Labs for our use of near-intents and cross-chain trading, Bitte for our use of chain abstraction,  and (this is post-minuimum demo) Absurd - push the boundries with creative, outlandish AI experiments (send a fraction of your swap % to a friend via phone number or to a 5013c Experimental Arts Organization for a tax deductable donation for US Citizens)
+We need to make it clear that we intend our submission for 4 prize tracks: Defi, Proximity Labs for our use of near-intents and cross-chain trading, and Bitte for our use of chain abstraction.
 
   The protagonist:
     An informercial style video opens in black and white with a dishelved person struggling to carry small plush pillows showing Bitcoin, Ethereum, and Near logos, they claim: "I couldn't buy the dip because I had no leverage, everything dipped, my portfolio tanked. How can I help my bags stay pumped??"
 
   Narrator:
-    There's an AI for that - Simply tell Divvy Bot "whenever my portfolio pumps at least 18%, swap 6% into USDT". Divvy Bot will consider the current USD value of all the chain signature support tokens in your wallet as a minimum threshold, and when the market pumps your value to grow by at least 18%, Divvy Bot uses a limited access key to call a contract deployed onto your account that allows it to autonomously and securely act on your behalf to swap a randomized combination of just enough tokens into your preferred stablecoin to realize 6% growth.
+    There's an AI for that - Simply tell Divvy Bot "whenever my portfolio pumps at least 18%, swap 6% into USDT". Divvy Bot will consider the current USD value of all the chain signature support tokens in your wallet as a minimum threshold, and when the market pumps your value to grow by at least 18%, Divvy Bot will select a randomized combination of just enough tokens into your preferred stablecoin to realize 6% growth and prompt you to approve the deposit/swap/withdraw transactions to realize your gains.
 
   The protagonist:
     Now in a color video, perhaps with a beautiful background, the person confidently hold much larger plush pillows showing Bitcoin, Ethereum, and Near logos as they claim " I'll never be broke again. I'll always be able to buy the dip."
@@ -72,9 +77,9 @@ Set and forget it with automated growth based stablecoin swaps, and give yoursel
 
 ## Technical Implementation
 
-### 1. Frontend/Bitte.ai Interface
+### 1. Frontend/Near.UI Interface
 
-### 2. Smart Contract(research required)
+### 2. Smart Contract - N/A
 
 ### 3. AI Integration
 
@@ -82,11 +87,11 @@ Set and forget it with automated growth based stablecoin swaps, and give yoursel
 
 ## Blockers:
 - **Q:** Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?  
-  **A:** **Bitte**  
+  **A:** **Near.AI**
 - **Q:** What role does the **LLM** play in the decision-making and allowance setup?  
   **A:** Setup and interface initially  
 - **Q:** Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.  
-  **A:** Research spike on solutions  
+  **A:** We've decided to pivot away from the fully autonomous FAK approach, and instead prompt the uses when an allowance goal has been triggered.
 
 ## Open Questions:
 - **Q:** Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)  
@@ -102,9 +107,9 @@ Set and forget it with automated growth based stablecoin swaps, and give yoursel
 - **Q:** Escrow or FAK?  
   **A:** Research spike needed.  
 - **Q:** Bitte or NEAR.ai?  
-  **A:** **Bitte**.  
+  **A:** **Near.ai**.
 - **Q:** Where does the UX live?  
-  **A:** Initially on **Bitte**.
+  **A:** Initially on **Near.ai**.
 
 ## Research Spikes:
 ### 1. **Escrow/LAK/FAK Options**  
