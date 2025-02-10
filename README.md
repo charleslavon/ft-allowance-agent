@@ -55,21 +55,21 @@ https://github.com/user-attachments/assets/ffed4bef-42b2-4b55-a2e1-fe4e529eabd3
 
 Set and forget it with automated growth based stablecoin swaps, and give yourself a regular stablecoinh allowance throughout volatile markets```
 
-2. **Dig into the details of how everything works. (1 min)**
-   - From within the Bitte wallet, go to the AI tab
-   - Click on Divvy
+2. **Dig into the details of how everything works. (30 seconds)**
+   - From within https://chat.near.ai/agents
+   - Clicks on Divvy
    - Divvy shows your portfolio of chainsignature supported tokens
    - Divvy prompts for the info needed to setup an allowance goal
    - Set allowance parameters
      * "Secure profits when portfolio grows 20%"
      * AI explains strategy and confirms understanding
-   - Demo trade
-   - Highlight automated stablecoin conversion
-   - Show allowances
+   - Show the notification with a link to approve the allowance deposit/swap/withdraw transactions (how close can we get to making this 'one-click' to approve a batch transaction?)
+   - Highlight that the allowance goal will be verified when the user clicks the link to verify that market conditions have not changed to cause the allowance goal to no longer be satisfied.
+   - Show the technical overview doc, with a QR code to our repository.
 
 3. Sustainability & Future Features (35 seconds)
   - To sustain our committment to open source, the Divvy Bot applies a fee of 1% of the output token per swap.
-  - This revenue will fund future enhancements: a standalone Divvy UI to support users with EVM, Coinbase, and Solana wallets, and what we hope will be part of our unique Intellectual Property, our asset optimization algorithm, which currently takes a randomized approach to determine the ideal quantities of tokens to swap into stablecoins while maintaining a specific ratio of holdings across token types. We will also explore extended this logic to consider SOV from a token's crypto twitter community, a user's comfortable risk level, and marco economic factors.
+  - This revenue will fund future enhancements: a standalone Divvy UI to support users with EVM, Coinbase, and Solana wallets, and what we hope will be part of our unique Intellectual Property, our asset optimization algorithm, which currently takes a randomized approach to determine the ideal quantities of tokens to swap into stablecoins while maintaining a specific ratio of holdings across token types. We will also explore extended this logic to consider SOV from a token's crypto twitter community, a user's comfortable risk level, a user's cost basis to inform selling tokens with the least tax impact, and their preferences of tokens to hold over the long-term.
 
 4. **Wrap-up (10s)**
    - Portfolio dashboard view
