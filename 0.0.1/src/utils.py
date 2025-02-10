@@ -154,6 +154,24 @@ def get_quotes(
     return quotes, best_usd_value
 
 
+async def get_recommended_token_allocations(target_usd_amount: float):
+    try:
+        params = {
+            'targetUsdAmount':target_usd_amount *1000000,
+            'tokenBalances': json.dumps({
+                "BTC": 0.08,
+                "ETH": 0.5,
+                "SOL": 4.2,
+                "NEAR": 330.42928
+            })
+        }
+        response = requests.get("https://ft-allowance-allocations.hello-d1f.workers.dev/", params=params)
+        print(response.json())
+        return response.json() if response.status_code == 200 else None
+    except requests.RequestException as e:
+        print(f"Error fetching allocations: {e}")
+        return None
+
 async def deposit_near(deposit_amount: int = ONE_NEAR):
     deposit_action = create_function_call_action(
         method_name="near_deposit",
@@ -283,7 +301,9 @@ async def main():
     print("best quote", best_quote)
 
     # Deposit the required Near to intents.near to be able to execute the swap
-    await deposit_near(near_to_swap)
+    #await deposit_near(near_to_swap)
+
+    await get_recommended_token_allocations(3000)
 
     # Create a publish_wnear_intent.json payload for the publish_intent call
     deadline = (datetime.now(timezone.utc) + timedelta(minutes=2)
@@ -316,7 +336,7 @@ async def main():
     signed_intent = PublishIntent(signed_data=signed_quote, quote_hashes=[
                                   best_quote.get("quote_hash")])
 
-    print(publish_intent(signed_intent))
+    #print(publish_intent(signed_intent))
 
 
 asyncio.run(main())
