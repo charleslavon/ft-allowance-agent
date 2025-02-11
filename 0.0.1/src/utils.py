@@ -101,6 +101,35 @@ def get_usdt_quotes(token_to_quantities: TokenMap) -> list:
     return list(map(lambda token_in: get_quotes([token_in], [
                 token_to_quantities[token_in]], get_usdt_token_out_type(token_in)), token_to_quantities.keys()))
 
+
+def get_near_account_balance(account_id: str) -> float:
+    """
+    Get account balance for given NEAR account ID.
+
+    Args:
+        account_id: NEAR account ID to query
+
+    Returns:
+        float: Account balance in yoctoNEAR
+    """
+    print(f"fetching account balance for {account_id}")
+    response = requests.post(
+        "https://rpc.mainnet.fastnear.com",
+        headers={"Content-Type": "application/json"},
+        json={
+            "jsonrpc": "2.0",
+            "id": "fastnear",
+            "method": "query",
+            "params": {
+                "request_type": "view_account",
+                "finality": "final",
+                "account_id": account_id
+            }
+        }
+    )
+    print(response.json())
+    return response.json()["result"]["amount"]
+
 def fetch_usd_price(url: str, parse_price: callable) -> Union[float, bool]:
     """
     Fetches USD price from API endpoint and parses response.
@@ -134,7 +163,7 @@ def fetch_coinbase(token: str) -> Union[float, bool]:
         bool: False if request fails
     """
     url = f"https://api.coinbase.com/v2/prices/{token}-USD/buy"
-    print(f'calling to fetch from  {url}')
+    print(f'fetching prices from  {url}')
 
     return fetch_usd_price(url, lambda o: float(o['data']['amount']))
 

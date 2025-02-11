@@ -1,6 +1,6 @@
 
 import re
-from src.utils import fetch_coinbase, fetch_coingecko, get_recommended_token_allocations
+from src.utils import fetch_coinbase, fetch_coingecko, get_recommended_token_allocations, get_near_account_balance
 
 USD_GOAL_REGEX = re.compile(r"usd:\s*(\d+)")
 
@@ -11,9 +11,12 @@ class Agent:
         self.usd_goal = None
         self.prices = None
         self.recommended_tokens = None
+        self.near_account_id = None
+        self.near_account_balance = None
         tool_registry = self.env.get_tool_registry()
         tool_registry.register_tool(self.recommend_token_allocations_to_swap_for_stablecoins)
         tool_registry.register_tool(self.get_allowance_goal)
+        tool_registry.register_tool(self.find_near_account_id)
 
 
     def find_usd_goal(self, chat_history):
@@ -50,10 +53,28 @@ class Agent:
         # Give the prompt back to the user
         self.env.request_user_input()
 
+    def find_near_account_id(self):
+        """Save the NEAR account ID of the user from chat history format 'near: <account_id>'"""
+        if not self.near_account_id:
+            for message in reversed(self.env.list_messages()):
+                if message['role'] == 'user' and message['content'].startswith("near:"):
+                    self.near_account_id = message['content'].split("near:")[1].strip()
+                    self.env.add_reply(f"Saving your NEAR account ID: {self.near_account_id}")
+        return self.near_account_id
 
     def fetch_token_prices(self):
         """Fetch the current prices of the tokens"""
         print("Fetching the current prices of the tokens in your wallet...")
+        self.find_near_account_id()
+        balance = get_near_account_balance(self.near_account_id)
+        if balance:
+            if len(balance) > 23:
+                length = len(balance)
+                chars_remaining = length - 23
+                # TODO improve the yocoto to Near conversion
+                self.near_account_balance = float(str(balance[0:chars_remaining-1]) + '.' + ''.join(balance[chars_remaining-1:length]))
+
+        print(f"Found NEAR balance: {self.near_account_balance}")
         near_price = fetch_coinbase("near")
         near_price = fetch_coingecko("near") if isinstance(near_price, bool) else near_price
 
@@ -68,7 +89,8 @@ class Agent:
         self.prices = ["NEAR:", near_price, "BTC:", btc_price, "ETH:", eth_price, "SOL:", sol_price]
 
         self.env.add_reply("Fetching the current prices of the tokens in your wallet...")
-        return str(self.prices)
+        return str(self.prices +  [f" Near account balance: {self.near_account_balance}"])
+
 
     def get_allowance_goal(self):
         """Given user prompts referring to goals, goal, usd, allowance, and target, find the allowance goal"""
