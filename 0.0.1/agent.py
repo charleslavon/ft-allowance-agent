@@ -9,6 +9,7 @@ class Agent:
     def __init__(self, env):
         self.env = env
         self.usd_goal = None
+        self.prices = None
         self.recommended_tokens = None
         tool_registry = self.env.get_tool_registry()
         tool_registry.register_tool(self.recommend_token_allocations_to_swap_for_stablecoins)
@@ -34,8 +35,6 @@ class Agent:
 
         # Use the model set in the metadata to generate a response
         result = self.env.completion([prompt] + self.env.list_messages())
-        # Store the result in the chat history
-        self.env.add_reply(result)
 
         chat_history = self.env.list_messages()
         last_user_query = self.get_last_search_term(chat_history)
@@ -54,6 +53,7 @@ class Agent:
 
     def fetch_token_prices(self):
         """Fetch the current prices of the tokens"""
+        print("Fetching the current prices of the tokens in your wallet...")
         near_price = fetch_coinbase("near")
         near_price = fetch_coingecko("near") if isinstance(near_price, bool) else near_price
 
@@ -65,8 +65,10 @@ class Agent:
 
         sol_price = fetch_coinbase("sol")
         sol_price = fetch_coingecko("sol") if isinstance(sol_price, bool) else sol_price
+        self.prices = ["NEAR:", near_price, "BTC:", btc_price, "ETH:", eth_price, "SOL:", sol_price]
 
         self.env.add_reply("Fetching the current prices of the tokens in your wallet...")
+        return str(self.prices)
 
     def get_allowance_goal(self):
         """Given user prompts referring to goals, goal, usd, allowance, and target, find the allowance goal"""
