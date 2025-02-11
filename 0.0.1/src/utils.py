@@ -1,4 +1,5 @@
 import asyncio
+from typing import Union
 import json
 import requests
 from typing import NewType
@@ -100,6 +101,58 @@ def get_usdt_quotes(token_to_quantities: TokenMap) -> list:
     return list(map(lambda token_in: get_quotes([token_in], [
                 token_to_quantities[token_in]], get_usdt_token_out_type(token_in)), token_to_quantities.keys()))
 
+def fetch_usd_price(url: str, parse_price: callable) -> Union[float, bool]:
+    """
+    Fetches USD price from API endpoint and parses response.
+
+    Args:
+        url: API endpoint URL
+        parse_price: Function to parse price from response JSON
+
+    Returns:
+        float: Parsed price if successful
+        bool: False if request fails
+    """
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        return parse_price(data)
+    except requests.RequestException as e:
+        print(f'Error fetching price from {url}: {e}')
+        return False
+
+def fetch_coinbase(token: str) -> Union[float, bool]:
+    """
+    Fetches USD price for a token from Coinbase API.
+
+    Args:
+        token: Token symbol (e.g. 'BTC', 'ETH')
+
+    Returns:
+        float: USD price if successful
+        bool: False if request fails
+    """
+    url = f"https://api.coinbase.com/v2/prices/{token}-USD/buy"
+    print(f'calling to fetch from  {url}')
+
+    return fetch_usd_price(url, lambda o: float(o['data']['amount']))
+
+
+def fetch_coingecko(token: str) -> Union[float, bool]:
+    """
+    Fetches USD price for a token from CoinGecko API.
+
+    Args:
+        token: Token ID (e.g. 'bitcoin', 'ethereum')
+
+    Returns:
+        float: USD price if successful
+        bool: False if request fails
+    """
+    url = f"https://api.coingecko.com/api/v3/simple/price?ids={token}&vs_currencies=usd"
+    print(f'calling to fetch from  {url}')
+    return fetch_usd_price(url, lambda o: float(o[token]['usd']))
 
 def get_quotes(
         token_in_ids: list[str],
@@ -154,7 +207,7 @@ def get_quotes(
     return quotes, best_usd_value
 
 
-async def get_recommended_token_allocations(target_usd_amount: float):
+def get_recommended_token_allocations(target_usd_amount: float):
     try:
         params = {
             'targetUsdAmount':target_usd_amount *1000000,
@@ -165,6 +218,7 @@ async def get_recommended_token_allocations(target_usd_amount: float):
                 "NEAR": 330.42928
             })
         }
+
         response = requests.get("https://ft-allowance-allocations.hello-d1f.workers.dev/", params=params)
         print(response.json())
         return response.json() if response.status_code == 200 else None
@@ -336,4 +390,4 @@ async def main():
     #print(publish_intent(signed_intent))
 
 
-asyncio.run(main())
+#asyncio.run(main())

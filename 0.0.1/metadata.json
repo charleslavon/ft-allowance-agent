@@ -11,10 +11,6 @@
         "model_provider": "fireworks",
         "model_temperature": 1.0,
         "model_max_tokens": 16384
-      },
-      "welcome": {
-        "description": "I can help you set a recurring allowance in stablecoins based off the potential growth in your chain-signature supported tokens. Shall we get started?",
-        "title":"Let's automate your gains"
       }
     },
     "display_name": "Token Allowance Agent"
