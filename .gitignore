@@ -2,6 +2,7 @@
 **/bin/
 **/.env
 **/lib/
+**/target/
 .DS_Store
 node_modules
 *.pyc
