@@ -114,10 +114,11 @@ class Agent:
     def get_allowance_goal(self):
         """Given user prompts referring to goals, goal, usd, allowance, and target, find the allowance goal"""
         chat_history = self.env.list_messages()
-        growth_goal = self.find_allowance_goal(chat_history)
-        if not self.growth_goal and growth_goal:
-            self.growth_goal = growth_goal
-        return self.growth_goal
+
+        allowance_goal = self.find_allowance_goal(chat_history)
+        if not self.allowance_goal and allowance_goal:
+            self.allowance_goal = allowance_goal
+        return self.allowance_goal
 
 
     def recommend_token_allocations_to_swap_for_stablecoins(self):
