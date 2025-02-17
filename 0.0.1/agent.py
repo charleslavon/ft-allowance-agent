@@ -2,13 +2,15 @@
 import re
 from src.utils import fetch_coinbase, fetch_coingecko, get_recommended_token_allocations, get_near_account_balance
 
-USD_GOAL_REGEX = re.compile(r"usd:\s*(\d+)")
+USD_PORTFOLIO_GOAL_REGEX = re.compile(r"portfolio:\s*(\d+)")
+USD_ALLOWANCE_GOAL_REGEX = re.compile(r"allowance:\s*(\d+)")
 
 class Agent:
 
     def __init__(self, env):
         self.env = env
-        self.usd_goal = None
+        self.growth_goal = None
+        self.allowance_goal = None
         self.prices = None
         self.recommended_tokens = None
         self.near_account_id = None
@@ -19,18 +21,25 @@ class Agent:
         tool_registry.register_tool(self.find_near_account_id)
 
 
-    def find_usd_goal(self, chat_history):
+    def find_growth_goal(self, chat_history):
         for message in reversed(chat_history):
-            match = USD_GOAL_REGEX.match(message['content'])
+            match = USD_PORTFOLIO_GOAL_REGEX.match(message['content'])
+            if message['role'] == 'user' and match:
+                return match.group(1)
+        return ''
+
+    def find_allowance_goal(self, chat_history):
+        for message in reversed(chat_history):
+            match = USD_ALLOWANCE_GOAL_REGEX.match(message['content'])
             if message['role'] == 'user' and match:
                 return match.group(1)
         return ''
 
     def get_last_search_term(self, chat_history):
-            for message in reversed(chat_history):
-                if message['role'] == 'user':
-                    return message['content']
-            return ''
+        for message in reversed(chat_history):
+           if message['role'] == 'user':
+               return message['content']
+        return ''
 
     def run(self):
         # A system message guides an agent to solve specific tasks.
@@ -45,6 +54,8 @@ class Agent:
           result = self.recommend_token_allocations_to_swap_for_stablecoins()
         elif last_user_query == "show allowance goal":
           result = self.get_allowance_goal()
+        elif last_user_query == "show growth goal":
+          result = self.get_growth_goal()
         elif last_user_query == "fetch prices":
           result = self.fetch_token_prices()
 
@@ -92,13 +103,21 @@ class Agent:
         return str(self.prices +  [f" Near account balance: {self.near_account_balance}"])
 
 
+    def get_growth_goal(self):
+        """Given user prompts referring to portfolio growth, token growth, find their USD growth goal"""
+        chat_history = self.env.list_messages()
+        growth_goal = self.find_growth_goal(chat_history)
+        if not self.growth_goal and growth_goal:
+            self.growth_goal = growth_goal
+        return self.growth_goal
+
     def get_allowance_goal(self):
         """Given user prompts referring to goals, goal, usd, allowance, and target, find the allowance goal"""
         chat_history = self.env.list_messages()
-        usd_goal = self.find_usd_goal(chat_history)
-        if not self.usd_goal and usd_goal:
-            self.usd_goal = usd_goal
-        return self.usd_goal
+        growth_goal = self.find_allowance_goal(chat_history)
+        if not self.growth_goal and growth_goal:
+            self.growth_goal = growth_goal
+        return self.growth_goal
 
 
     def recommend_token_allocations_to_swap_for_stablecoins(self):
@@ -106,7 +125,7 @@ class Agent:
         if not self.recommended_tokens:
             self.env.add_reply(f"Considering your options with a preference for holding BTC...")
             self.get_allowance_goal()
-            self.recommended_tokens = get_recommended_token_allocations(int(self.usd_goal))
+            self.recommended_tokens = get_recommended_token_allocations(int(self.allowance_goal))
 
         self.env.add_reply(f"We can sell this quantity of your tokens to realize your target USD in stablecoin...")
         return str(self.recommended_tokens) if self.recommended_tokens else ""
