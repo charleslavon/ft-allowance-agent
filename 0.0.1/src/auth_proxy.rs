@@ -1,5 +1,5 @@
 use near_sdk::json_types::{Base58CryptoHash, U64};
-use near_sdk::{bs58, env, near, near_bindgen, AccountId, CurveType, Gas, NearToken, PanicOnDefault, Promise, PublicKey};
+use near_sdk::{bs58, env, near, AccountId, CurveType, Gas, NearToken, PanicOnDefault, Promise, PublicKey};
 use near_sdk::collections::UnorderedSet;
 use near_gas::NearGas;
 use sha2::{Sha256, Digest};
@@ -18,7 +18,7 @@ const GAS_FOR_REQUEST_SIGNATURE: NearGas = NearGas::from_tgas(10);
 const TESTNET_SIGNER: &str = "v1.signer-prod.testnet";
 //const MAINNET_SIGNER: &str = "v1.signer";
 
-#[near_bindgen]
+#[near(contract_state)]
 #[derive(PanicOnDefault)]
 pub struct ProxyContract {
     owner_id: AccountId,
@@ -186,7 +186,7 @@ impl ProxyContract {
 
     // View methods
     pub fn is_authorized(&self, account_id: AccountId) -> bool {
-        self.authorized_users.contains(&account_id)
+        self.authorized_users.contains(&account_id) || self.owner_id == account_id
     }
 
     // Helper methods
