@@ -1,5 +1,66 @@
 wip fungible token allowance agent for near.ai
 
+### setup
+
+1. Create a wallet if you don't have one via [Bitte](https://wallet.bitte.ai)
+
+1. Sign up on [near.ai](https://app.near.ai/) with your Bitte wallet.
+
+1. Install nearai CLI
+
+   ```sh
+   pip install nearai
+   nearai version
+   ```
+
+1. Log the CLI in and auth with your Bitte wallet
+
+   ```sh
+   nearai login
+   ```
+
+1. Create a directory named after your Near account in the `~/.nearai/registry` directory
+
+   ```sh
+   mkdir -p ~/.nearai/registry/my-acc.near
+   ```
+
+1. Clone the repo and install the dependencies
+
+   ```sh
+   cd ~/.nearai/registry/my-acc.near
+   git clone git@github.com:beneviolabs/ft-allowance-agent.git
+   cd ft-allowance-agent
+   python3 -m venv .venv && . .venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+1. Set the following variables in your environment each time you run the agent
+
+   ```sh
+   export ACCOUNT_ID=... # my-acc.near
+   export FA_PUB_KEY=... # ed25519:...
+   export FA_PRIV_KEY=... # ed25519:...
+   ```
+
+1. Run the agent locally
+
+   ```sh
+   nearai agent interactive ~/.nearai/registry/<your-acc>.near/ft-allowance-agent/0.0.1 --local
+   # > hi
+   # < Assistant: Hello! I'm here
+   ```
+
+   > ℹ️ In case you don't get any responses, add print to the library `nearai/agents/agent.py` file in your site-packages
+
+   ```python
+   def run_python_code(...):
+     ...
+     # ln: 152
+     except ...:
+       print(f"Error running agent code: {e}")
+   ```
+
 ### linting
 `autopep8 --in-place --aggressive --aggressive *.py`
 
@@ -8,7 +69,6 @@ wip fungible token allowance agent for near.ai
 
 ### download a published agent
 `nearai registry download zavodil.near/swap-agent/latest`
-
 
 ### Minimal AI Agent Demo
 Divvy is a portfolio optimizing Defi Agent that capitalizes on market volatility to grow your wealth, by determining which tokens to periodically swap into stablecoins to secure gains without reducing your portfolio below some minimum USD value. Realize these gains for yourself, or setup a conditional recurring allowance for your crypto curious friends & family.
