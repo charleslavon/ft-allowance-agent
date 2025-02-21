@@ -30,7 +30,6 @@ class Agent:
         )
         tool_registry.register_tool(self.get_allowance_goal)
         tool_registry.register_tool(self.find_near_account_id)
-        tool_registry.register_tool(self.find_foo_id)
 
     def find_growth_goal(self, chat_history):
         for message in reversed(chat_history):
@@ -111,10 +110,6 @@ class Agent:
                         f"Saving your NEAR account ID: {self.near_account_id}"
                     )
         return self.near_account_id
-
-    def find_foo_id(self):
-        """Fetch the user's foo ID"""
-        return "foobar:123456"
 
     def fetch_token_prices(self):
         """Fetch the current prices of the tokens"""
