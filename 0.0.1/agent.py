@@ -30,6 +30,7 @@ class Agent:
         )
         tool_registry.register_tool(self.get_allowance_goal)
         tool_registry.register_tool(self.find_near_account_id)
+        tool_registry.register_tool(self.get_near_account_balance)
 
     def find_growth_goal(self, chat_history):
         for message in reversed(chat_history):
@@ -58,27 +59,33 @@ class Agent:
             "content": """You are an assistant that helps people set goals for growth in the USD value of their crypto assets
             such that when that percentage in growth has been reached or surpassed, you look at their tokens and
             determine the tokens and quantities of each to swap for USDT stablecoins or USDC stablecoins.
-            You also have access to some auxiliary info about their wallets and accounts""",
+            You also have access to some auxiliary info about their wallets and accounts in your data.""",
         }
 
         # Use the model set in the metadata to generate a response
         # result = self.env.completion([prompt] + self.env.list_messages())
         tools = self.env.get_tool_registry().get_all_tool_definitions()
-        res = self.env.completion_and_get_tools_calls(
+        tools_completion = self.env.completion_and_get_tools_calls(
             [prompt] + [self.env.get_last_message() or ""], tools=tools
         )
-        self.env.add_system_log(f"Should call tools: {res.tool_calls}", logging.DEBUG)
+        self.env.add_system_log(
+            f"Should call tools: {tools_completion.tool_calls}", logging.DEBUG
+        )
 
-        if res.message:
-            self.env.add_reply(res.message)
-        if res.tool_calls and len(res.tool_calls) > 0:
-            tool_call_results = self._handle_tool_calls(res.tool_calls)
+        if tools_completion.message:
+            self.env.add_reply(tools_completion.message)
+        if tools_completion.tool_calls and len(tools_completion.tool_calls) > 0:
+            tool_call_results = self._handle_tool_calls(tools_completion.tool_calls)
             if len(tool_call_results) > 0:
                 self.env.add_system_log(
                     f"Got tool call results: {tool_call_results}", logging.DEBUG
                 )
                 result = self.env.completion(
                     [prompt] + self.env.list_messages() + tool_call_results
+                )
+                self.env.add_system_log(
+                    f"Got completion for tool call with results: {result}",
+                    logging.DEBUG,
                 )
 
         chat_history = self.env.list_messages()
@@ -110,6 +117,11 @@ class Agent:
                         f"Saving your NEAR account ID: {self.near_account_id}"
                     )
         return self.near_account_id
+
+    def get_near_account_balance(self):
+        """Get the NEAR account balance of the user in yoctoNEAR"""
+        balance = get_near_account_balance(self.near_account_id)
+        return balance
 
     def fetch_token_prices(self):
         """Fetch the current prices of the tokens"""
@@ -179,7 +191,7 @@ class Agent:
     def _handle_tool_calls(
         self, tool_calls: typing.List[ChatCompletionMessageToolCall]
     ) -> typing.List[typing.Dict]:
-        """Execute the tool calls and return the results"""
+        """Execute the tool calls and return a result for the LLM to process"""
         results = []
         for tool_call in tool_calls:
             # exec_command tool call seems to be for executing commands on the Terminal? probably should be deregistered
