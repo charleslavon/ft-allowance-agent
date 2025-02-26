@@ -31,6 +31,7 @@ class Agent:
         )
         tool_registry.register_tool(self.get_allowance_goal)
         tool_registry.register_tool(self.find_near_account_id)
+        tool_registry.register_tool(self.save_near_account_id)
         tool_registry.register_tool(self.find_foobar_id)
         tool_registry.register_tool(self.get_near_account_balance)
 
@@ -83,7 +84,7 @@ You must follow the following instructions:
         }
 
         # Use the model set in the metadata to generate a response
-        # result = self.env.completion([prompt] + self.env.list_messages())
+        result = ""
         tools = self.env.get_tool_registry().get_all_tool_definitions()
         tools_completion = self.env.completion_and_get_tools_calls(
             [prompt] + [self.env.get_last_message() or ""], tools=tools
@@ -103,7 +104,7 @@ You must follow the following instructions:
                 context = [prompt] + self.env.list_messages() + tool_call_results
                 result = self.env.completion(context)
                 self.env.add_system_log(
-                    f"Got completion for tool call with results: {result}. Contexr: {context}",
+                    f"Got completion for tool call with results: {result}. Context: {context}",
                     logging.DEBUG,
                 )
 
@@ -136,6 +137,10 @@ You must follow the following instructions:
 
     @staticmethod
     def _to_system_response(value: typing.Any) -> typing.Dict:
+        """
+        Generate a system message with the given value
+        We would use self.env.add_reply but it forces the message to be an assistant message
+        """
         return {"role": "system", "content": json.dumps(value)}
 
     def _get_function_name(self) -> str:
@@ -143,22 +148,34 @@ You must follow the following instructions:
         return inspect.stack()[1][3]
 
     def find_near_account_id(self) -> typing.List[typing.Dict]:
-        """Save the NEAR account ID of the user from chat history format 'near: <account_id>'"""
+        """Find the NEAR account ID of the user"""
         tool_name = self._get_function_name()
         responses = []
         if not self.near_account_id:
-            responses.append(
-                self._to_system_response(
-                    "There is no NEAR account ID right now. Would you like to set one?"
-                )
+            self.env.add_reply(
+                "There is no NEAR account ID right now. Please provide one.",
+                message_type="system",
             )
-            # for message in reversed(self.env.list_messages()):
-            #     if message["role"] == "user" and message["content"].startswith("near:"):
-            #         self.near_account_id = message["content"].split("near:")[1].strip()
-            #         self.env.add_reply(
-            #             f"Saving your NEAR account ID: {self.near_account_id}"
-            #         )
+
         responses.append(self._to_function_response(tool_name, self.near_account_id))
+        return responses
+
+    def save_near_account_id(self, near_id: str) -> typing.List[typing.Dict]:
+        """FIXME: Save the near ID the user provides"""
+        # TODO: add some validation
+        responses = []
+        if near_id:
+            print(f"Saving NEAR account ID: {near_id}")
+            self.near_account_id = near_id
+            self.env.add_reply(
+                f"Saved your NEAR account ID: {self.near_account_id}",
+                message_type="system",
+            )
+        else:
+            self.env.add_reply(
+                "Please provide a valid NEAR account ID.",
+                message_type="system",
+            )
         return responses
 
     def find_foobar_id(self):
