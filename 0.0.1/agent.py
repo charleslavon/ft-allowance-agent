@@ -1,4 +1,5 @@
 import logging
+import inspect
 import json
 import re
 import typing
@@ -22,7 +23,7 @@ class Agent:
         self.allowance_goal = None
         self.prices = None
         self.recommended_tokens = None
-        self.near_account_id = "ptke.near"
+        self.near_account_id = None
         self.near_account_balance = None
         tool_registry = self.env.get_tool_registry()
         tool_registry.register_tool(
@@ -30,6 +31,7 @@ class Agent:
         )
         tool_registry.register_tool(self.get_allowance_goal)
         tool_registry.register_tool(self.find_near_account_id)
+        tool_registry.register_tool(self.find_foobar_id)
         tool_registry.register_tool(self.get_near_account_balance)
 
     def find_growth_goal(self, chat_history):
@@ -56,10 +58,28 @@ class Agent:
         # A system message guides an agent to solve specific tasks.
         prompt = {
             "role": "system",
-            "content": """You are an assistant that helps people set goals for growth in the USD value of their crypto assets
-            such that when that percentage in growth has been reached or surpassed, you look at their tokens and
-            determine the tokens and quantities of each to swap for USDT stablecoins or USDC stablecoins.
-            You also have access to some auxiliary info about their wallets and accounts in your data.""",
+            "content": """
+You are Divvy, a financial assistant that helps users manage and grow their crypto portfolio.
+
+Your capabilities are defined below and are facilitated by the tools you have access to.
+
+-Capabilities-
+* You can recommend the tokens and quantities of each asset on a user's portfolio to swap for USDT or USDC stablecoins.
+* You can fetch the current prices of certain crypto tokens (NEAR, BTC, ETH, SOL).
+* You have access NEAR account details of a user such as the balance and id.
+* You can fetch the user's foobar ID.
+* You can fetch the user's growth goal.
+* You can fetch the user's allowance goal.
+
+You must follow the following instructions:
+
+-Instructions-
+* Be polite and helpful to the user.
+* When introducing yourself, provide a brief description of what your purpose is.
+* Tell the user if you don't support a capability. Do NOT make up or provide false information or figures.
+* Do not expose the functions you have access to to the user.
+* Do not use figures or function call from preceding messages to generate responses.
+""",
         }
 
         # Use the model set in the metadata to generate a response
@@ -80,11 +100,10 @@ class Agent:
                 self.env.add_system_log(
                     f"Got tool call results: {tool_call_results}", logging.DEBUG
                 )
-                result = self.env.completion(
-                    [prompt] + self.env.list_messages() + tool_call_results
-                )
+                context = [prompt] + self.env.list_messages() + tool_call_results
+                result = self.env.completion(context)
                 self.env.add_system_log(
-                    f"Got completion for tool call with results: {result}",
+                    f"Got completion for tool call with results: {result}. Contexr: {context}",
                     logging.DEBUG,
                 )
 
@@ -107,16 +126,45 @@ class Agent:
         # Give the prompt back to the user
         self.env.request_user_input()
 
-    def find_near_account_id(self):
+    @staticmethod
+    def _to_function_response(function_name: str, value: typing.Any) -> typing.Dict:
+        return {
+            "role": "function",
+            "name": function_name,
+            "content": json.dumps(value),
+        }
+
+    @staticmethod
+    def _to_system_response(value: typing.Any) -> typing.Dict:
+        return {"role": "system", "content": json.dumps(value)}
+
+    def _get_function_name(self) -> str:
+        """Get the name of the function that called this function"""
+        return inspect.stack()[1][3]
+
+    def find_near_account_id(self) -> typing.List[typing.Dict]:
         """Save the NEAR account ID of the user from chat history format 'near: <account_id>'"""
+        tool_name = self._get_function_name()
+        responses = []
         if not self.near_account_id:
-            for message in reversed(self.env.list_messages()):
-                if message["role"] == "user" and message["content"].startswith("near:"):
-                    self.near_account_id = message["content"].split("near:")[1].strip()
-                    self.env.add_reply(
-                        f"Saving your NEAR account ID: {self.near_account_id}"
-                    )
-        return self.near_account_id
+            responses.append(
+                self._to_system_response(
+                    "There is no NEAR account ID right now. Would you like to set one?"
+                )
+            )
+            # for message in reversed(self.env.list_messages()):
+            #     if message["role"] == "user" and message["content"].startswith("near:"):
+            #         self.near_account_id = message["content"].split("near:")[1].strip()
+            #         self.env.add_reply(
+            #             f"Saving your NEAR account ID: {self.near_account_id}"
+            #         )
+        responses.append(self._to_function_response(tool_name, self.near_account_id))
+        return responses
+
+    def find_foobar_id(self):
+        """Find a user's foobar ID"""
+        # make this a system message
+        return [self._to_system_response("There is no foobar ID set.")]
 
     def get_near_account_balance(self):
         """Get the NEAR account balance of the user in yoctoNEAR"""
@@ -205,13 +253,7 @@ class Agent:
                 )
                 continue
             args = json.loads(tool_call.function.arguments)
-            results.append(
-                {
-                    "role": "function",
-                    "name": tool_call.function.name,
-                    "content": json.dumps(tool(**args)),
-                }
-            )
+            results.extend(tool(**args))
         return results
 
     def recommend_token_allocations_to_swap_for_stablecoins(self):
