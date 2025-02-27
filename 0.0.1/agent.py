@@ -57,6 +57,7 @@ class Agent:
 
     def run(self):
         # A system message guides an agent to solve specific tasks.
+        # TODO: probably best to deduplicate the list of capabilities in this prompt and instead tell the LLM to rely on the function docstrings from the tool registry
         prompt = {
             "role": "system",
             "content": """
@@ -68,7 +69,6 @@ Your capabilities are defined below and are facilitated by the tools you have ac
 * You can recommend the tokens and quantities of each asset on a user's portfolio to swap for USDT or USDC stablecoins.
 * You can fetch the current prices of crypto tokens in a user's wallet (e.g. NEAR, BTC, ETH, SOL).
 * You have access NEAR account details of a user such as the balance and id.
-* You can fetch the user's foobar ID.
 * You can fetch the user's growth goal.
 * You can fetch the user's allowance goal.
 
@@ -101,8 +101,10 @@ You must follow the following instructions:
                 self.env.add_system_log(
                     f"Got tool call results: {tool_call_results}", logging.DEBUG
                 )
+
                 context = [prompt] + self.env.list_messages() + tool_call_results
                 result = self.env.completion(context)
+
                 self.env.add_system_log(
                     f"Got completion for tool call with results: {result}. Context: {context}",
                     logging.DEBUG,
@@ -120,7 +122,8 @@ You must follow the following instructions:
         elif last_user_query == "show growth goal":
             result = self.get_growth_goal()
 
-        self.env.add_reply(result)
+        if result:
+            self.env.add_reply(result)
 
         # Give the prompt back to the user
         self.env.request_user_input()
@@ -133,13 +136,13 @@ You must follow the following instructions:
             "content": json.dumps(value),
         }
 
-    def _get_function_name(self) -> str:
-        """Get the name of the function that called this function"""
+    def _get_tool_name(self) -> str:
+        """Return the function name of the calling function as the tool name"""
         return inspect.stack()[1][3]
 
     def find_near_account_id(self) -> typing.List[typing.Dict]:
         """Find the NEAR account ID of the user"""
-        tool_name = self._get_function_name()
+        tool_name = self._get_tool_name()
         responses = []
         if not self.near_account_id:
             self.env.add_reply(
@@ -152,14 +155,14 @@ You must follow the following instructions:
 
     def get_near_account_balance(self) -> typing.List[typing.Dict]:
         """Get the NEAR account balance of the user in yoctoNEAR"""
-        tool_name = self._get_function_name()
+        tool_name = self._get_tool_name()
         balance = get_near_account_balance(self.near_account_id)
         return [self._to_function_response(tool_name, balance)]
 
     # IMPROVE: this function can be parameterized to only query prices for tokens user specifies and fetch all if there's no param value
     def fetch_token_prices(self):
         """Fetch the current market prices of the tokens in a user's wallet"""
-        tool_name = self._get_function_name()
+        tool_name = self._get_tool_name()
         self.find_near_account_id()
         balance = get_near_account_balance(self.near_account_id)
         if balance:
@@ -263,8 +266,8 @@ You must follow the following instructions:
         either using something like [query rephrasing](https://python.langchain.com/docs/integrations/retrievers/re_phrase/)
         Or establishing a statemachine to track which op/transaction we're in.
         """
-        # TODO: add some validation
         responses = []
+        # TODO: add some validation
         if near_id:
             print(f"Saving NEAR account ID: {near_id}")
             self.near_account_id = near_id
