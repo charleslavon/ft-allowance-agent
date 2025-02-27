@@ -32,8 +32,8 @@ class Agent:
         tool_registry.register_tool(self.get_allowance_goal)
         tool_registry.register_tool(self.find_near_account_id)
         tool_registry.register_tool(self.save_near_account_id)
-        tool_registry.register_tool(self.find_foobar_id)
         tool_registry.register_tool(self.get_near_account_balance)
+        tool_registry.register_tool(self.fetch_token_prices)
 
     def find_growth_goal(self, chat_history):
         for message in reversed(chat_history):
@@ -66,7 +66,7 @@ Your capabilities are defined below and are facilitated by the tools you have ac
 
 -Capabilities-
 * You can recommend the tokens and quantities of each asset on a user's portfolio to swap for USDT or USDC stablecoins.
-* You can fetch the current prices of certain crypto tokens (NEAR, BTC, ETH, SOL).
+* You can fetch the current prices of crypto tokens in a user's wallet (e.g. NEAR, BTC, ETH, SOL).
 * You have access NEAR account details of a user such as the balance and id.
 * You can fetch the user's foobar ID.
 * You can fetch the user's growth goal.
@@ -84,7 +84,7 @@ You must follow the following instructions:
         }
 
         # Use the model set in the metadata to generate a response
-        result = ""
+        result = None
         tools = self.env.get_tool_registry().get_all_tool_definitions()
         tools_completion = self.env.completion_and_get_tools_calls(
             [prompt] + [self.env.get_last_message() or ""], tools=tools
@@ -119,8 +119,6 @@ You must follow the following instructions:
             result = self.get_allowance_goal()
         elif last_user_query == "show growth goal":
             result = self.get_growth_goal()
-        elif last_user_query == "fetch prices":
-            result = self.fetch_token_prices()
 
         self.env.add_reply(result)
 
@@ -134,14 +132,6 @@ You must follow the following instructions:
             "name": function_name,
             "content": json.dumps(value),
         }
-
-    @staticmethod
-    def _to_system_response(value: typing.Any) -> typing.Dict:
-        """
-        Generate a system message with the given value
-        We would use self.env.add_reply but it forces the message to be an assistant message
-        """
-        return {"role": "system", "content": json.dumps(value)}
 
     def _get_function_name(self) -> str:
         """Get the name of the function that called this function"""
@@ -160,37 +150,16 @@ You must follow the following instructions:
         responses.append(self._to_function_response(tool_name, self.near_account_id))
         return responses
 
-    def save_near_account_id(self, near_id: str) -> typing.List[typing.Dict]:
-        """FIXME: Save the near ID the user provides"""
-        # TODO: add some validation
-        responses = []
-        if near_id:
-            print(f"Saving NEAR account ID: {near_id}")
-            self.near_account_id = near_id
-            self.env.add_reply(
-                f"Saved your NEAR account ID: {self.near_account_id}",
-                message_type="system",
-            )
-        else:
-            self.env.add_reply(
-                "Please provide a valid NEAR account ID.",
-                message_type="system",
-            )
-        return responses
-
-    def find_foobar_id(self):
-        """Find a user's foobar ID"""
-        # make this a system message
-        return [self._to_system_response("There is no foobar ID set.")]
-
-    def get_near_account_balance(self):
+    def get_near_account_balance(self) -> typing.List[typing.Dict]:
         """Get the NEAR account balance of the user in yoctoNEAR"""
+        tool_name = self._get_function_name()
         balance = get_near_account_balance(self.near_account_id)
-        return balance
+        return [self._to_function_response(tool_name, balance)]
 
+    # IMPROVE: this function can be parameterized to only query prices for tokens user specifies and fetch all if there's no param value
     def fetch_token_prices(self):
-        """Fetch the current prices of the tokens"""
-        print("Fetching the current prices of the tokens in your wallet...")
+        """Fetch the current market prices of the tokens in a user's wallet"""
+        tool_name = self._get_function_name()
         self.find_near_account_id()
         balance = get_near_account_balance(self.near_account_id)
         if balance:
@@ -204,7 +173,9 @@ You must follow the following instructions:
                     + "".join(balance[chars_remaining - 1 : length])
                 )
 
-        print(f"Found NEAR balance: {self.near_account_balance}")
+        self.env.add_reply(
+            "Fetching the current prices of the tokens in your wallet..."
+        )
         near_price = fetch_coinbase("near")
         near_price = (
             fetch_coingecko("near") if isinstance(near_price, bool) else near_price
@@ -229,12 +200,7 @@ You must follow the following instructions:
             sol_price,
         ]
 
-        self.env.add_reply(
-            "Fetching the current prices of the tokens in your wallet..."
-        )
-        return str(
-            self.prices + [f" Near account balance: {self.near_account_balance}"]
-        )
+        return [self._to_function_response(tool_name, self.prices)]
 
     def get_growth_goal(self):
         """Given user prompts referring to portfolio growth, token growth, find their USD growth goal"""
@@ -288,6 +254,30 @@ You must follow the following instructions:
             f"We can sell this quantity of your tokens to realize your target USD in stablecoin..."
         )
         return str(self.recommended_tokens) if self.recommended_tokens else ""
+
+    def save_near_account_id(self, near_id: str) -> typing.List[typing.Dict]:
+        """Save the near ID the user provides
+        FIXME: We need to find a way to get the LLM to trigger this. Right now it calls an
+        SDK defined tool called `read_file`. It differs from our other tools in that we don't have a user input yet
+        for the LLM to parse and know to trigger this function so we need to redesign the flow
+        either using something like [query rephrasing](https://python.langchain.com/docs/integrations/retrievers/re_phrase/)
+        Or establishing a statemachine to track which op/transaction we're in.
+        """
+        # TODO: add some validation
+        responses = []
+        if near_id:
+            print(f"Saving NEAR account ID: {near_id}")
+            self.near_account_id = near_id
+            self.env.add_reply(
+                f"Saved your NEAR account ID: {self.near_account_id}",
+                message_type="system",
+            )
+        else:
+            self.env.add_reply(
+                "Please provide a valid NEAR account ID.",
+                message_type="system",
+            )
+        return responses
 
 
 if globals().get("env", None):

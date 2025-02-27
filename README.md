@@ -35,14 +35,6 @@ wip fungible token allowance agent for near.ai
    pip install -r requirements.txt
    ```
 
-1. Set the following variables in your environment each time you run the agent
-
-   ```sh
-   export ACCOUNT_ID=... # my-acc.near
-   export FA_PUB_KEY=... # ed25519:...
-   export FA_PRIV_KEY=... # ed25519:...
-   ```
-
 1. Run the agent locally
 
    ```sh
@@ -60,6 +52,8 @@ wip fungible token allowance agent for near.ai
      except ...:
        print(f"Error running agent code: {e}")
    ```
+
+   Other SDK logs can be found at `/tmp/nearai-agent-runner/ptke.near/ft-allowance-agent/0.0.1/system_log.txt`.
 
 ### linting
 `autopep8 --in-place --aggressive --aggressive *.py`
@@ -108,7 +102,7 @@ We need to make it clear that we intend our submission for 4 prize tracks: Defi,
     Now in a color video, perhaps with a beautiful background, the person confidently hold much larger plush pillows showing Bitcoin, Ethereum, and Near logos as they claim " I'll never be broke again. I'll always be able to buy the dip."
 
   Narrator:
-   Never be this guy again 
+   Never be this guy again
 
 https://github.com/user-attachments/assets/ffed4bef-42b2-4b55-a2e1-fe4e529eabd3
 
@@ -146,45 +140,45 @@ Set and forget it with automated growth based stablecoin swaps, and give yoursel
 ### 4. Backend
 
 ## Blockers:
-- **Q:** Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?  
+- **Q:** Is this a **bitte AI agent** or a **near AI agent**? Which would give us an advantage?
   **A:** **Near.AI**
-- **Q:** What role does the **LLM** play in the decision-making and allowance setup?  
-  **A:** Setup and interface initially  
-- **Q:** Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.  
+- **Q:** What role does the **LLM** play in the decision-making and allowance setup?
+  **A:** Setup and interface initially
+- **Q:** Full access key to a wallet has race conditions. We need to determine if the smart contract holds funds.
   **A:** We've decided to pivot away from the fully autonomous FAK approach, and instead prompt the uses when an allowance goal has been triggered.
 
 ## Open Questions:
-- **Q:** Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)  
-  **A:** Secure database (not smart contract) to preserve privacy and prevent frontrunning.  
-- **Q:** Where do the **working variables** (e.g., last payment date & amount) get stored?  
-  **A:** Research **Bitte** options for storage.  
-- **Q:** If we are doing smart contract escrow, what's executing the trade?  
+- **Q:** Where do the allowances get stored and accessed? (growth target, allowance amount, payment frequency)
+  **A:** Secure database (not smart contract) to preserve privacy and prevent frontrunning.
+- **Q:** Where do the **working variables** (e.g., last payment date & amount) get stored?
+  **A:** Research **Bitte** options for storage.
+- **Q:** If we are doing smart contract escrow, what's executing the trade?
   **A:** Research spike
-- **Q:** Stretch goal - Staking integration/optimization, potentially with Nuffle Labs?  
-  **A:** Not to be prioritized for now.  
+- **Q:** Stretch goal - Staking integration/optimization, potentially with Nuffle Labs?
+  **A:** Not to be prioritized for now.
 
 ## Key Decisions:
-- **Q:** Escrow or FAK?  
-  **A:** Research spike needed.  
-- **Q:** Bitte or NEAR.ai?  
+- **Q:** Escrow or FAK?
+  **A:** Research spike needed.
+- **Q:** Bitte or NEAR.ai?
   **A:** **Near.ai**.
-- **Q:** Where does the UX live?  
+- **Q:** Where does the UX live?
   **A:** Initially on **Near.ai**.
 
 ## Research Spikes:
-### 1. **Escrow/LAK/FAK Options**  
-  - What are the tradeoffs here?  
+### 1. **Escrow/LAK/FAK Options**
+  - What are the tradeoffs here?
 
-### 2. **Cron Job Feasibility**  
-  - Can we execute trades in the background with cron?  
-  - What would be executing the trades?  
+### 2. **Cron Job Feasibility**
+  - Can we execute trades in the background with cron?
+  - What would be executing the trades?
   - May need results from the Escrow/LAK/FAK spike to proceed.
 
 ### 3. **NEAR Intents:**
-  - How do we retrieve **user crypto balances**?  
-  - How do we fetch **current prices**?  
-  - How to execute **swaps**, handling slippage and fees?  
-  - Which **assets** can we support?  
+  - How do we retrieve **user crypto balances**?
+  - How do we fetch **current prices**?
+  - How to execute **swaps**, handling slippage and fees?
+  - Which **assets** can we support?
   - How to manage the access key with intents?
 
 ### 4. **Allowance storage:**
